@@ -1,0 +1,92 @@
+name: Release Russian Layout Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'crates/codegen/xai-grok-pager/**'
+      - 'crates/codegen/xai-grok-pager-bin/**'
+      - '.github/workflows/release-russian-layout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            exe: xai-grok-pager.exe
+            archive: grok-build-windows-x86_64.zip
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            exe: xai-grok-pager
+            archive: grok-build-linux-x86_64.tar.gz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.94.0
+          targets: ${{ matrix.target }}
+
+      - name: Install DotSlash
+        shell: bash
+        run: cargo install dotslash --locked
+
+      - name: Build release binary
+        shell: bash
+        run: cargo build -p xai-grok-pager-bin --release --features release-dist --target ${{ matrix.target }}
+
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.exe }}" dist/
+          Compress-Archive -Path dist/${{ matrix.exe }} -DestinationPath "${{ matrix.archive }}"
+
+      - name: Package Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.target }}/release/${{ matrix.exe }}" dist/
+          tar -C dist -czf "${{ matrix.archive }}" "${{ matrix.exe }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive }}
+          path: ${{ matrix.archive }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v1.0.5-ru-layout-fix"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" release-assets/* \
+            --title "Grok Build 1.0.5 — Russian Layout Fix" \
+            --notes "Fixes Ctrl+V and Ctrl+Shift+V paste shortcuts when the Windows keyboard layout is Russian (РУС). Ordinary Russian text input is unchanged.\n\nBuild commit: $GITHUB_SHA" \
+            --target "$GITHUB_SHA"
