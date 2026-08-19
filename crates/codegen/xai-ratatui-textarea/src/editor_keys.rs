@@ -16,10 +16,10 @@ pub(crate) fn resolve_movement(event: &KeyEvent) -> Option<Movement> {
         KeyCode::End => return Some(Movement::LogicalLineEnd),
         KeyCode::Up => return Some(Movement::VisualRowUp),
         KeyCode::Down => return Some(Movement::VisualRowDown),
-        KeyCode::Char('p' | 'з') if event.modifiers == KeyModifiers::CONTROL => {
+        KeyCode::Char('p') if event.modifiers == KeyModifiers::CONTROL => {
             return Some(Movement::VisualRowUp);
         }
-        KeyCode::Char('n' | 'т') if event.modifiers == KeyModifiers::CONTROL => {
+        KeyCode::Char('n') if event.modifiers == KeyModifiers::CONTROL => {
             return Some(Movement::VisualRowDown);
         }
         _ => {}
@@ -44,12 +44,13 @@ pub fn classify_key_event(event: &KeyEvent) -> Option<EditCommand> {
             ..
         } => Some(EditCommand::MoveGraphemeRight),
         KeyEvent {
-            code: KeyCode::Char('h' | 'р'),
+            code: KeyCode::Char('h'),
             modifiers,
             ..
         } if *modifiers == (KeyModifiers::CONTROL | KeyModifiers::ALT) => {
             Some(EditCommand::DeleteWordBackward(WordStyle::Small))
         }
+        // Kitty protocol loss can surface Backspace as raw BS or DEL; modifiers are unreliable.
         KeyEvent {
             code: KeyCode::Char('\u{0008}' | '\u{007f}'),
             ..
@@ -64,9 +65,8 @@ pub fn classify_key_event(event: &KeyEvent) -> Option<EditCommand> {
             modifiers,
             ..
         } => Some(delete_command(*modifiers)),
-        // Ctrl+W / Ctrl+Ц — the latter is Ctrl+W on the Russian layout.
         KeyEvent {
-            code: KeyCode::Char('w' | 'ц'),
+            code: KeyCode::Char('w'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::DeleteWordBackward(
@@ -86,15 +86,13 @@ pub fn classify_key_event(event: &KeyEvent) -> Option<EditCommand> {
         } if modifiers.intersects(KeyModifiers::ALT | KeyModifiers::CONTROL) => {
             Some(EditCommand::MoveWordRight(WordStyle::Small))
         }
-        // Ctrl+A / Ctrl+Ф
         KeyEvent {
-            code: KeyCode::Char('a' | 'ф'),
+            code: KeyCode::Char('a'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::MoveLogicalLineStart),
-        // Ctrl+E / Ctrl+У
         KeyEvent {
-            code: KeyCode::Char('e' | 'у'),
+            code: KeyCode::Char('e'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::MoveLogicalLineEnd),
@@ -104,7 +102,7 @@ pub fn classify_key_event(event: &KeyEvent) -> Option<EditCommand> {
             ..
         }
         | KeyEvent {
-            code: KeyCode::Char('b' | 'и'),
+            code: KeyCode::Char('b'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::MoveGraphemeLeft),
@@ -114,90 +112,47 @@ pub fn classify_key_event(event: &KeyEvent) -> Option<EditCommand> {
             ..
         }
         | KeyEvent {
-            code: KeyCode::Char('f' | 'а'),
+            code: KeyCode::Char('f'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::MoveGraphemeRight),
         KeyEvent {
-            code: KeyCode::Char('b' | 'и'),
+            code: KeyCode::Char('b'),
             modifiers: KeyModifiers::ALT,
             ..
         } => Some(EditCommand::MoveWordLeft(WordStyle::Small)),
         KeyEvent {
-            code: KeyCode::Char('f' | 'а'),
+            code: KeyCode::Char('f'),
             modifiers: KeyModifiers::ALT,
             ..
         } => Some(EditCommand::MoveWordRight(WordStyle::Small)),
-        // Ctrl+U / Ctrl+Г
         KeyEvent {
-            code: KeyCode::Char('u' | 'г'),
+            code: KeyCode::Char('u'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::DeleteToLineStart),
-        // Ctrl+K / Ctrl+Л
         KeyEvent {
-            code: KeyCode::Char('k' | 'л'),
+            code: KeyCode::Char('k'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::DeleteToLineEnd),
-        // Ctrl+H / Ctrl+Р
         KeyEvent {
-            code: KeyCode::Char('h' | 'р'),
+            code: KeyCode::Char('h'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::DeleteGraphemeBackward),
-        // Ctrl+D / Ctrl+В
         KeyEvent {
-            code: KeyCode::Char('d' | 'в'),
+            code: KeyCode::Char('d'),
             modifiers: KeyModifiers::CONTROL,
             ..
         } => Some(EditCommand::DeleteGraphemeForward),
         KeyEvent {
-            code: KeyCode::Char('d' | 'в'),
+            code: KeyCode::Char('d'),
             modifiers,
             ..
         } if modifiers.intersects(KeyModifiers::ALT | KeyModifiers::SUPER) => {
             Some(EditCommand::DeleteWordForward(WordStyle::Small))
         }
-        // Ctrl-modified command keys are layout-independent. Windows terminals can
-        // report the character produced by the active keyboard layout, so accept
-        // both the US key and its Russian keyboard equivalent. This is deliberately
-        // limited to command chords; ordinary Russian text remains untouched.
-        KeyEvent {
-            code: KeyCode::Char('c' | 'с'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
-        KeyEvent {
-            code: KeyCode::Char('v' | 'м'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
-        KeyEvent {
-            code: KeyCode::Char('x' | 'ч'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
-        KeyEvent {
-            code: KeyCode::Char('y' | 'н'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
-        KeyEvent {
-            code: KeyCode::Char('z' | 'я'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
-        KeyEvent {
-            code: KeyCode::Char('r' | 'к'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
-        KeyEvent {
-            code: KeyCode::Char('j' | 'о' | 'm' | 'ь'),
-            modifiers: KeyModifiers::CONTROL,
-            ..
-        } => None,
         KeyEvent {
             code: KeyCode::Char(character),
             modifiers: KeyModifiers::NONE | KeyModifiers::SHIFT,
@@ -230,6 +185,7 @@ fn shifted_char(character: char) -> char {
 }
 
 fn backspace_command(modifiers: KeyModifiers) -> EditCommand {
+    // Backspace preserves exact historical chords; extra modifiers fall back to grapheme delete.
     match modifiers {
         KeyModifiers::ALT | KeyModifiers::CONTROL => {
             EditCommand::DeleteWordBackward(WordStyle::Small)
@@ -240,6 +196,7 @@ fn backspace_command(modifiers: KeyModifiers) -> EditCommand {
 }
 
 fn delete_command(modifiers: KeyModifiers) -> EditCommand {
+    // Delete accepts Shift in addition to a word modifier because enhanced protocols retain it.
     if modifiers.intersects(KeyModifiers::ALT | KeyModifiers::CONTROL | KeyModifiers::SUPER) {
         EditCommand::DeleteWordForward(WordStyle::Small)
     } else {
