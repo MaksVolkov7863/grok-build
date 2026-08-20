@@ -41,6 +41,15 @@ jobs:
         shell: bash
         run: cargo install dotslash --locked
 
+      - name: Install protoc (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install protoc --version=29.3.0 -y --no-progress
+          $protoc = (Get-Command protoc.exe -ErrorAction Stop).Source
+          & $protoc --version
+          "PROTOC=$protoc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Build release binary
         shell: bash
         run: cargo build -p xai-grok-pager-bin --release --features release-dist --target ${{ matrix.target }}
