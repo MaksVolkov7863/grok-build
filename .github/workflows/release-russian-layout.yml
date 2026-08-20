@@ -7,6 +7,11 @@ on:
       - 'crates/codegen/xai-grok-pager/**'
       - 'crates/codegen/xai-grok-pager-bin/**'
       - '.github/workflows/release-russian-layout.yml'
+  pull_request:
+    paths:
+      - 'crates/codegen/xai-grok-pager/**'
+      - 'crates/codegen/xai-grok-pager-bin/**'
+      - '.github/workflows/release-russian-layout.yml'
   workflow_dispatch:
 
 permissions:
@@ -158,6 +163,7 @@ fn unique_suffix() -> u64 {
           path: ${{ matrix.archive }}
 
   release:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-24.04
     steps:
