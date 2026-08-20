@@ -49,7 +49,12 @@ fn main() -> ExitCode {
 
     if let Some(path) = dep_file {
         match fs::read_to_string(&path) {
-            Ok(contents) => print!("{contents}"),
+            Ok(contents) => {
+                // xai-proto-build expects dependency lines to start with "/dev/null:".
+                // On Windows protoc writes "NUL:" instead — normalize it.
+                let normalized = contents.replacen("NUL:", "/dev/null:", 1);
+                print!("{normalized}");
+            }
             Err(e) => {
                 eprintln!(
                     "protoc wrapper: failed to read dependency file {}: {e}",
