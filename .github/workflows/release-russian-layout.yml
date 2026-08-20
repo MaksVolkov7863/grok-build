@@ -31,7 +31,29 @@ jobs:
           toolchain: 1.94.0
           targets: ${{ matrix.target }}
 
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Sccache Setup
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Configure Sccache & Flags
+        shell: bash
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+
       - name: Install DotSlash
+        uses: actions/cache@v4
+        id: dotslash-cache
+        with:
+          path: ~/.cargo/bin/dotslash*
+          key: dotslash-${{ runner.os }}
+
+      - name: Install DotSlash binary
+        if: steps.dotslash-cache.outputs.cache-hit != 'true'
         shell: bash
         run: cargo install dotslash --locked
 
