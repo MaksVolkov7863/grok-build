@@ -83,12 +83,17 @@ pub enum TextKey {
     SelectUrlManual,
 }
 
-/// Translate a static UI string.
-///
-/// Dynamic values (URLs, paths, usernames, model names, tool names and model
-/// output) must remain outside this catalog and be interpolated by the caller.
+/// Translate a static UI string using the current application language.
 pub fn tr(key: TextKey) -> Cow<'static, str> {
-    let text = match (language(), key) {
+    tr_for(language(), key)
+}
+
+/// Translate a static UI string for a specific language.
+///
+/// Kept public so tests and future settings UI can render a preview without
+/// changing the process-wide language.
+pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
+    let text = match (language, key) {
         (Language::English, TextKey::AuthBrowserHeader) => {
             "A browser window will open for authentication."
         }
@@ -216,28 +221,8 @@ mod tests {
         ];
 
         for key in values {
-            assert!(!english(key).is_empty());
-            assert!(!russian(key).is_empty());
+            assert!(!tr_for(Language::English, key).is_empty());
+            assert!(!tr_for(Language::Russian, key).is_empty());
         }
-    }
-
-    fn english(key: TextKey) -> Cow<'static, str> {
-        match key {
-            _ => catalog(Language::English, key),
-        }
-    }
-
-    fn russian(key: TextKey) -> Cow<'static, str> {
-        catalog(Language::Russian, key)
-    }
-
-    fn catalog(language: Language, key: TextKey) -> Cow<'static, str> {
-        // The public `tr` reads the process-wide language. Keep the regression
-        // test independent from environment variables by checking the catalog
-        // through a small source-level invariant: both languages are represented
-        // by non-empty strings in the translation table above.
-        let _ = language;
-        let _ = key;
-        tr(key)
     }
 }
