@@ -634,7 +634,7 @@ pub(crate) fn filter_palette_entries(
     result
 }
 impl ActiveModal {
-    pub fn hint_pairs(&self, drain_blocked: bool) -> Vec<(char, &'static str)> {
+    pub fn hint_pairs(&self, drain_blocked: bool) -> Vec<(char, std::borrow::Cow<'static, str>)> {
         match self {
             ActiveModal::EditConfirm { modal, .. } => modal
                 .options

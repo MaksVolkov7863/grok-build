@@ -596,7 +596,7 @@ pub fn render_turn_status(
         } else {
             right_style(theme.gray)
         };
-        let span = Span::styled(bg_str, bg_style);
+        let span = Span::styled(&bg_str, bg_style);
         buf.set_span(x, area.y, &span, bg_width as u16);
         x += bg_width as u16;
         Some(Rect::new(bg_x, area.y, bg_str.width() as u16, 1))
@@ -612,7 +612,7 @@ pub fn render_turn_status(
         } else {
             right_style(theme.gray)
         };
-        let span = Span::styled(cancel_str, cancel_style);
+        let span = Span::styled(&cancel_str, cancel_style);
         buf.set_span(x, area.y, &span, cancel_width as u16);
         Some(Rect::new(cancel_x, area.y, cancel_width as u16, 1))
     } else {

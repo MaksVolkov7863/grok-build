@@ -1762,12 +1762,16 @@ fn render_welcome_done(
     // frame so the menu doesn't shift while the CDN fetch completes.
     let show_changelog_action = p.has_access && !show_picker;
 
-    let gate_menu: [(&str, std::borrow::Cow<'static, str>); 3];
-    let owned_menu: Vec<(&str, std::borrow::Cow<'static, str>)>;
+    let gate_menu: [(&str, std::borrow::Cow<'_, str>); 3];
+    let owned_menu: Vec<(&str, std::borrow::Cow<'_, str>)>;
     use crate::i18n::{TextKey, tr};
-    let menu_items_tuples: Vec<(&str, std::borrow::Cow<'static, str>)> = if !p.has_access {
+    let menu_items_tuples: Vec<(&str, std::borrow::Cow<'_, str>)> = if !p.has_access {
+        let cta_label = match p.gate.and_then(|g| g.label.as_deref()) {
+            Some(custom) => std::borrow::Cow::Borrowed(custom),
+            None => tr(TextKey::UpgradeSubscription),
+        };
         gate_menu = [
-            (key_g, std::borrow::Cow::Borrowed(cta)),
+            (key_g, cta_label),
             (key_l, tr(TextKey::Logout)),
             (key_q, tr(TextKey::QuitLabel)),
         ];
