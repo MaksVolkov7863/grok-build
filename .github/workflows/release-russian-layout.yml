@@ -7,6 +7,11 @@ on:
       - 'crates/codegen/xai-grok-pager/**'
       - 'crates/codegen/xai-grok-pager-bin/**'
       - '.github/workflows/release-russian-layout.yml'
+  pull_request:
+    paths:
+      - 'crates/codegen/xai-grok-pager/**'
+      - 'crates/codegen/xai-grok-pager-bin/**'
+      - '.github/workflows/release-russian-layout.yml'
   workflow_dispatch:
 
 permissions:
@@ -45,10 +50,91 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          choco install protoc --version=29.3.0 -y --no-progress
-          $protoc = (Get-Command protoc.exe -ErrorAction Stop).Source
-          & $protoc --version
-          "PROTOC=$protoc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'protoc-29.3'
+          $zip = Join-Path $env:RUNNER_TEMP 'protoc-29.3-win64.zip'
+          $url = 'https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-win64.zip'
+
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $root -Force
+
+          $bin = Join-Path $root 'bin'
+          $realProtoc = Join-Path $bin 'protoc-real.exe'
+          $wrapper = Join-Path $bin 'protoc-wrapper.exe'
+          Copy-Item (Join-Path $bin 'protoc.exe') $realProtoc -Force
+
+          $wrapperSource = @'
+use std::{env, fs};
+use std::path::PathBuf;
+use std::process::{Command, ExitCode};
+
+fn main() -> ExitCode {
+    let exe_dir = match env::current_exe().and_then(|p| p.parent().map(PathBuf::from).ok_or_else(|| std::io::Error::other("missing executable directory"))) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("protoc wrapper: {e}");
+            return ExitCode::from(1);
+        }
+    };
+    let real = exe_dir.join("protoc-real.exe");
+    let mut args = Vec::new();
+    let mut dep_file: Option<PathBuf> = None;
+
+    for arg in env::args_os().skip(1) {
+        let text = arg.to_string_lossy();
+        if text == "--dependency_out=/dev/stdout" {
+            let path = env::temp_dir().join(format!("grok-protoc-{}-{}.d", std::process::id(), unique_suffix()));
+            args.push(format!("--dependency_out={}", path.display()).into());
+            dep_file = Some(path);
+        } else if text == "--descriptor_set_out=/dev/null" {
+            args.push("--descriptor_set_out=NUL".into());
+        } else {
+            args.push(arg);
+        }
+    }
+
+    let status = match Command::new(&real).args(&args).status() {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("protoc wrapper: failed to execute {}: {e}", real.display());
+            return ExitCode::from(1);
+        }
+    };
+
+    if !status.success() {
+        return ExitCode::from(status.code().unwrap_or(1) as u8);
+    }
+
+    if let Some(path) = dep_file {
+        match fs::read_to_string(&path) {
+            Ok(contents) => print!("{contents}"),
+            Err(e) => {
+                eprintln!("protoc wrapper: failed to read dependency file {}: {e}", path.display());
+                return ExitCode::from(1);
+            }
+        }
+        let _ = fs::remove_file(path);
+    }
+
+    ExitCode::SUCCESS
+}
+
+fn unique_suffix() -> u64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_nanos() as u64)
+        .unwrap_or(0)
+}
+'@
+          $source = Join-Path $env:RUNNER_TEMP 'protoc-wrapper.rs'
+          Set-Content -Path $source -Value $wrapperSource -Encoding utf8
+          rustc $source -O -o $wrapper
+
+          & $realProtoc --version
+          & $wrapper --version
+          "PROTOC=$wrapper" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build release binary
         shell: bash
@@ -77,6 +163,7 @@ jobs:
           path: ${{ matrix.archive }}
 
   release:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-24.04
     steps:
