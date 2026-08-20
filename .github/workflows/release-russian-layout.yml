@@ -1,19 +1,10 @@
-name: Release Russian Layout Fix
+name: Release Russian Localization
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'crates/codegen/xai-grok-pager/**'
-      - 'crates/codegen/xai-grok-pager-bin/**'
-      - '.github/workflows/release-russian-layout.yml'
-      - '.github/scripts/protoc-wrapper.rs'
   pull_request:
-    paths:
-      - 'crates/codegen/xai-grok-pager/**'
-      - 'crates/codegen/xai-grok-pager-bin/**'
-      - '.github/workflows/release-russian-layout.yml'
-      - '.github/scripts/protoc-wrapper.rs'
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -29,10 +20,6 @@ jobs:
             target: x86_64-pc-windows-msvc
             exe: xai-grok-pager.exe
             archive: grok-build-windows-x86_64.zip
-          - os: ubuntu-24.04
-            target: x86_64-unknown-linux-gnu
-            exe: xai-grok-pager
-            archive: grok-build-linux-x86_64.tar.gz
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -85,14 +72,6 @@ jobs:
           Copy-Item "target/${{ matrix.target }}/release/${{ matrix.exe }}" dist/
           Compress-Archive -Path dist/${{ matrix.exe }} -DestinationPath "${{ matrix.archive }}"
 
-      - name: Package Linux
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          mkdir -p dist
-          cp "target/${{ matrix.target }}/release/${{ matrix.exe }}" dist/
-          tar -C dist -czf "${{ matrix.archive }}" "${{ matrix.exe }}"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -100,7 +79,7 @@ jobs:
           path: ${{ matrix.archive }}
 
   release:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-24.04
     steps:
@@ -117,9 +96,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="v1.0.5-ru-layout-fix"
+          TAG="v1.0.6-ru-full"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           gh release create "$TAG" release-assets/* \
-            --title "Grok Build 1.0.5 — Russian Layout Fix" \
-            --notes "Fixes Ctrl+V and Ctrl+Shift+V paste shortcuts when the Windows keyboard layout is Russian (РУС). Ordinary Russian text input is unchanged.\n\nBuild commit: $GITHUB_SHA" \
+            --title "Grok Build 1.0.6 — Полная русская локализация и фикс раскладки" \
+            --notes "Включает полную русскую локализацию интерфейса, статусов выполнения, инструментов и фикс горячих клавиш вставки (Ctrl+V / Ctrl+Shift+V) на русской раскладке в Windows.\n\nBuild commit: $GITHUB_SHA" \
             --target "$GITHUB_SHA"
