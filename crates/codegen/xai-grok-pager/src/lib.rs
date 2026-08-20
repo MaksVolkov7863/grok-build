@@ -23,6 +23,7 @@ pub(crate) mod fs_size;
 pub mod git_info;
 pub mod headless;
 pub mod hyperlink_route;
+pub mod i18n;
 pub mod inline_media_ffmpeg;
 pub mod input;
 pub mod input_log;
