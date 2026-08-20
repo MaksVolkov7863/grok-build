@@ -132,24 +132,24 @@ impl Watchers {
 /// zero. Single owner of the format mechanics so the agent view's idle cue
 /// and the dashboard's background-work label cannot drift.
 pub(crate) fn format_still_running<'a>(
-    kinds: impl IntoIterator<Item = (usize, &'a str)>,
+    counts_and_nouns: impl IntoIterator<Item = (usize, &'a str)>,
 ) -> Option<String> {
-    use std::fmt::Write as _;
-    let mut label = String::with_capacity(48);
-    for (count, noun) in kinds {
+    use crate::i18n::{TextKey, format_count_noun, tr};
+    let mut label = String::new();
+    for (count, noun) in counts_and_nouns {
         if count == 0 {
             continue;
         }
         if !label.is_empty() {
             label.push_str(" \u{00b7} ");
         }
-        let plural = if count == 1 { "" } else { "s" };
-        let _ = write!(label, "{count} {noun}{plural}");
+        label.push_str(&format_count_noun(count, noun));
     }
     if label.is_empty() {
         return None;
     }
-    label.push_str(" still running");
+    label.push(' ');
+    label.push_str(&tr(TextKey::StillRunning));
     Some(label)
 }
 
@@ -303,17 +303,25 @@ pub fn render_turn_status(
         // Parked with held queued rows: the queued hint IS the input-semantics
         // story (Enter acts on the queue immediately), so it replaces the
         // generic interrupt copy.
+        use crate::i18n::{TextKey, tr};
         let parked_suffix = if held_queue > 0 && held_queue_top_sendable {
-            format!(" \u{00b7} {held_queue} queued — Enter to send now")
+            let enter_hint = tr(TextKey::EnterToSendNow);
+            let queued_label = tr(TextKey::Queued);
+            format!(" \u{00b7} {held_queue} {queued_label} — {enter_hint}")
         } else if held_queue > 0 {
-            format!(" \u{00b7} {held_queue} queued")
+            let queued_label = tr(TextKey::Queued);
+            format!(" \u{00b7} {held_queue} {queued_label}")
         } else {
-            " \u{00b7} send a message to interrupt".to_string()
+            let interrupt_hint = tr(TextKey::SendAMessageToInterrupt);
+            format!(" \u{00b7} {interrupt_hint}")
         };
         let cue = match (still_running_label(watchers), parked) {
             (Some(label), true) => Some(format!("{label}{parked_suffix}")),
             (Some(label), false) => Some(label),
-            (None, true) => Some(format!("waiting{parked_suffix}")),
+            (None, true) => {
+                let wait_label = tr(TextKey::Waiting);
+                Some(format!("{wait_label}{parked_suffix}"))
+            }
             (None, false) => None,
         };
         if let Some(cue) = cue {
@@ -390,25 +398,24 @@ pub fn render_turn_status(
             state,
             AgentState::TurnRunning | AgentState::CommandRunning { .. }
         );
+    let send_to_bg_label = crate::i18n::tr(crate::i18n::TextKey::SendToBg);
     let bg_str = if show_bg {
         if bg_hovered {
-            " [send to bg]"
+            format!(" [{send_to_bg_label}]")
         } else {
-            " [\u{2193}]"
+            " [\u{2193}]".to_string()
         }
     } else {
-        ""
+        String::new()
     };
     let bg_width = bg_str.width();
 
-    // Cancel button: always `[stop]`. Leading space only when the bg button
-    // is not shown (otherwise they're adjacent). Every arm is a `&'static str`
-    // so the per-frame status line never allocates. Hover state is conveyed by
-    // color (red on hover, see `cancel_style`), not by swapping the label.
-    let cancel_str: &str = match (show_cancel, show_bg) {
-        (false, _) => "",
-        (true, true) => "[stop]",
-        (true, false) => " [stop]",
+    // Cancel button: [stop].
+    let stop_label = crate::i18n::tr(crate::i18n::TextKey::Stop);
+    let cancel_str: String = match (show_cancel, show_bg) {
+        (false, _) => String::new(),
+        (true, true) => format!("[{stop_label}]"),
+        (true, false) => format!(" [{stop_label}]"),
     };
     let cancel_width = cancel_str.width();
 
@@ -448,16 +455,6 @@ pub fn render_turn_status(
     let phase_timer_width = phase_timer_str.width();
 
     // Timer style (gray for both phase and turn timers).
-    //
-    // Right-side elements (turn timer, bg button, cancel button) must set
-    // fg, bg, AND remove_modifier explicitly. fill_background() paints
-    // bg_base on every cell before widgets render, but set_line() for the
-    // left content may overwrite fg/modifiers on cells in the right zone.
-    // A Style with bg:None (the default) cannot restore bg after a reset,
-    // and a Style without remove_modifier cannot clear leaked modifiers.
-    // Right-side cells normally paint `bg_base`; in a flat-background host
-    // (minimal mode) use the terminal's own background so the row stays
-    // transparent like the rest of the live region.
     let timer_bg = if flat_background {
         Color::Reset
     } else {
@@ -480,12 +477,6 @@ pub fn render_turn_status(
     // ── Render left side: spinner + label (truncated) + phase_timer + queued_hint ──
     let mut left_spans: Vec<Span<'static>> = Vec::with_capacity(5);
 
-    // Spinner color: usually inherits the activity color (green for tools,
-    // secondary for thinking/responding, yellow for retries). While the
-    // tool is parked on the user we render `◆` with a smooth pulse from
-    // dim→bright in `accent_user`, matching the drain-blocked and
-    // plan-approval indicators so every "your turn" status has the same
-    // visual cadence.
     let spinner_style = if is_pending_user_input {
         let diamond_color = pending_diamond_color(&theme, theme.accent_user, tick);
         Style::default().fg(diamond_color)
@@ -499,13 +490,12 @@ pub fn render_turn_status(
     if is_tool {
         if let Some(TurnActivity::ToolRunning { title, description }) = activity {
             if is_asking {
-                // Ask tools: render as a unified gray label (like Thinking/Responding),
-                // not as a command invocation — yellow is reserved for shell commands.
                 let detail = title
                     .strip_prefix("Ask: ")
                     .or_else(|| title.strip_prefix("Ask "))
                     .unwrap_or(title.as_str());
-                let msg = format!("Waiting on answers for {detail}");
+                let prefix = crate::i18n::tr(crate::i18n::TextKey::WaitingOnAnswersFor);
+                let msg = format!("{prefix}{detail}");
                 let display = truncate_str(&msg, available_for_label);
                 left_spans.push(Span::styled(display, activity_style));
             } else if let Some(desc) = description
@@ -513,16 +503,11 @@ pub fn render_turn_status(
                 .map(str::trim)
                 .filter(|s| !s.is_empty())
             {
-                // Bash (and similar) tools carry a human description — prefer
-                // that over the raw command for the status line so a sleep /
-                // long-running exec reads as `{description}…` rather than
-                // `Run sleep 5 && …`.
                 let msg = crate::acp::tracker::format_waiting_for_subject(desc);
                 let display = truncate_str(&msg, available_for_label);
                 left_spans.push(Span::styled(display, activity_style));
             } else if let Some(query) = title.strip_prefix("Web search: ") {
-                // Web search: "Search " (muted) + query (yellow)
-                let prefix = "Search ";
+                let prefix = crate::i18n::tr(crate::i18n::TextKey::SearchPrefix).into_owned();
                 let prefix_width = prefix.width();
                 let query = query.trim_matches('"');
                 let max_query = available_for_label.saturating_sub(prefix_width).max(5);
@@ -530,21 +515,14 @@ pub fn render_turn_status(
                 left_spans.push(Span::styled(prefix, Style::default().fg(theme.gray)));
                 left_spans.push(Span::styled(display, Style::default().fg(theme.command)));
             } else if let Some(url) = title.strip_prefix("Fetch: ") {
-                // Fetch tools: "Fetch " (muted) + URL (yellow)
-                let prefix = "Fetch ";
+                let prefix = crate::i18n::tr(crate::i18n::TextKey::FetchPrefix).into_owned();
                 let prefix_width = prefix.width();
                 let max_url = available_for_label.saturating_sub(prefix_width).max(5);
                 let display = truncate_str(url, max_url);
                 left_spans.push(Span::styled(prefix, Style::default().fg(theme.gray)));
                 left_spans.push(Span::styled(display, Style::default().fg(theme.command)));
             } else {
-                // Normal tool: "Run " (muted) + command (syntax-highlighted).
-                // For qualified MCP tool names the activity title is the
-                // raw `server__action` string from ACP; prettify it to
-                // `(Server) Action` so the spinner doesn't show the ugly
-                // delimiter form. Non-MCP titles (bash commands etc.) are
-                // returned untouched by `mcp_pretty_name_if_qualified`.
-                let prefix = "Run ";
+                let prefix = crate::i18n::tr(crate::i18n::TextKey::RunPrefix).into_owned();
                 let pretty = mcp_pretty_name_if_qualified(title.as_str());
                 let detail = pretty.as_str();
                 let prefix_width = prefix.width();
@@ -556,18 +534,14 @@ pub fn render_turn_status(
             }
         }
     } else {
-        // Sendable wait holding queued messages: the persistent inline hint
-        // saying why the queue is paused and how to send anyway. On the status
-        // row (not an ephemeral tip) so it stays visible for the whole wait,
-        // and dropped before the label truncates on a narrow terminal.
-        // "Enter to send now" is advertised only when Enter would actually
-        // send the top row (bash / client-expanded local rows refuse with a
-        // toast — see `AgentView::held_queue_top_sendable`).
+        use crate::i18n::{TextKey, tr};
         let suffix = if held_queue > 0 && is_sendable_wait(activity) {
+            let queued_label = tr(TextKey::Queued);
             if held_queue_top_sendable {
-                format!(" · {held_queue} queued — Enter to send now")
+                let enter_hint = tr(TextKey::EnterToSendNow);
+                format!(" · {held_queue} {queued_label} — {enter_hint}")
             } else {
-                format!(" · {held_queue} queued")
+                format!(" · {held_queue} {queued_label}")
             }
         } else {
             String::new()
@@ -660,39 +634,29 @@ fn compute_activity(
     is_bash_turn: bool,
     goal_verifying: bool,
 ) -> (Style, String, bool) {
+    use crate::i18n::{TextKey, tr};
     match (state, activity) {
         (AgentState::TurnCancelling | AgentState::CommandCancelling { .. }, _) => (
             Style::default().fg(theme.accent_error),
-            "Cancelling…".to_string(),
+            tr(TextKey::Cancelling).into_owned(),
             false,
         ),
-        // Goal-mode completion verification runs in-turn after the model
-        // stops streaming. The harness drives the skeptic panel (the model
-        // itself is idle), but the turn's last streaming activity can still
-        // read as `Responding`/`Thinking`; label the whole window
-        // "Verifying…" so the multi-minute panel isn't mislabelled as the
-        // model responding (or a hung "Waiting…").
         (AgentState::TurnRunning, _) if goal_verifying => (
             Style::default().fg(theme.text_secondary),
-            "Verifying…".to_string(),
+            tr(TextKey::Verifying).into_owned(),
             false,
         ),
         (AgentState::TurnRunning, Some(TurnActivity::Thinking)) => (
             Style::default().fg(theme.text_secondary),
-            "Thinking…".to_string(),
+            tr(TextKey::Thinking).into_owned(),
             false,
         ),
         (AgentState::TurnRunning, Some(TurnActivity::Responding)) => (
             Style::default().fg(theme.text_secondary),
-            "Responding…".to_string(),
+            tr(TextKey::Responding).into_owned(),
             false,
         ),
         (AgentState::TurnRunning, Some(TurnActivity::ToolRunning { title, description })) => {
-            // "Ask" tools (AskUserQuestion) use gray spinner like Thinking —
-            // green feels out of place when the user is answering questions.
-            // Human descriptions (e.g. bash `description`) also use muted
-            // secondary — they read as a wait subject (`Wait 5s…`), not a
-            // green `Run <command>` invocation.
             let is_ask = title.starts_with("Ask: ") || title.starts_with("Ask ");
             let has_desc = description
                 .as_deref()
@@ -707,12 +671,15 @@ fn compute_activity(
         }
         (AgentState::TurnRunning, Some(TurnActivity::AutoCompacting)) => (
             Style::default().fg(theme.text_secondary),
-            "Compacting…".to_string(),
+            tr(TextKey::Compacting).into_owned(),
             false,
         ),
         (AgentState::TurnRunning, Some(TurnActivity::Retrying { attempt, .. })) => (
             Style::default().fg(theme.warning),
-            format!("Retrying (attempt {attempt})…"),
+            match crate::i18n::language() {
+                crate::i18n::Language::English => format!("Retrying (attempt {attempt})…"),
+                crate::i18n::Language::Russian => format!("Повторная попытка ({attempt})…"),
+            },
             false,
         ),
         (AgentState::TurnRunning, Some(TurnActivity::WritingToolCall(writing))) => (
@@ -721,25 +688,18 @@ fn compute_activity(
             false,
         ),
         (AgentState::TurnRunning, Some(TurnActivity::Waiting(reason))) => (
-            // Explicit wait reason (model / subagent / task output / tasks /
-            // sleep): name what the agent is blocked on instead of a generic
-            // "Waiting…". See `WaitingReason` and `AgentView::resolve_turn_activity`.
             Style::default().fg(theme.text_secondary),
             reason.label(),
             false,
         ),
         (AgentState::TurnRunning, None) if is_bash_turn => (
-            // Bash turn: not inference, show generic "Running…".
             Style::default().fg(theme.text_secondary),
-            "Running…".to_string(),
+            tr(TextKey::Running).into_owned(),
             false,
         ),
         (AgentState::TurnRunning, None) => (
-            // Fallback: a running inference turn with no resolved activity. The
-            // view resolves this gap into Waiting(Model/Subagent) before render,
-            // so this is now a rarely-hit safety net.
             Style::default().fg(theme.text_secondary),
-            "Waiting…".to_string(),
+            tr(TextKey::Waiting).into_owned(),
             false,
         ),
         (
@@ -795,9 +755,10 @@ fn render_starting_session(
     let frame_idx = (tick / SPINNER_DIVISOR) as usize % frames.len();
     let timer_str = format!(" {}", format_turn_timer(progress.started_at.elapsed()));
     let style = Style::default().fg(theme.gray_dim);
+    let label = crate::i18n::tr(crate::i18n::TextKey::StartingSession);
     let spans = vec![
         Span::styled(format!("{} ", frames[frame_idx]), style),
-        Span::styled("Starting session…", style),
+        Span::styled(label, style),
         Span::styled(timer_str, style),
     ];
     buf.set_line(area.x, area.y, &Line::from(spans), area.width);

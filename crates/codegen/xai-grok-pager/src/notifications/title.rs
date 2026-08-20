@@ -203,7 +203,8 @@ fn write_item(
                 return false;
             }
             push_separator(buf, has_parts);
-            buf.push_str("\u{26A0} Action Required");
+            let label = crate::i18n::tr(crate::i18n::TextKey::ActionRequired);
+            let _ = write!(buf, "\u{26A0} {label}");
         }
     }
     *has_parts = true;
@@ -217,9 +218,10 @@ fn push_separator(buf: &mut String, has_parts: &mut bool) {
 }
 
 fn write_activity(buf: &mut String, activity: &TurnActivity) {
+    use crate::i18n::{TextKey, tr};
     match activity {
-        TurnActivity::Thinking => buf.push_str("Thinking"),
-        TurnActivity::Responding => buf.push_str("Responding"),
+        TurnActivity::Thinking => buf.push_str(&tr(TextKey::Thinking)),
+        TurnActivity::Responding => buf.push_str(&tr(TextKey::Responding)),
         TurnActivity::ToolRunning { title, description } => {
             if let Some(desc) = description
                 .as_deref()
@@ -228,19 +230,27 @@ fn write_activity(buf: &mut String, activity: &TurnActivity) {
             {
                 buf.push_str(&crate::acp::tracker::format_waiting_for_subject(desc));
             } else if title.is_empty() {
-                buf.push_str("Running tool");
+                buf.push_str(&tr(TextKey::Running));
             } else {
-                buf.push_str("Running: ");
+                let prefix = tr(TextKey::RunPrefix);
+                buf.push_str(&prefix);
                 write_truncated(buf, title, 30);
             }
         }
-        TurnActivity::AutoCompacting => buf.push_str("Compacting"),
+        TurnActivity::AutoCompacting => buf.push_str(&tr(TextKey::Compacting)),
         TurnActivity::Retrying {
             attempt,
             max_retries,
             ..
         } => {
-            let _ = write!(buf, "Retrying ({}/{})", attempt, max_retries);
+            match crate::i18n::language() {
+                crate::i18n::Language::English => {
+                    let _ = write!(buf, "Retrying ({}/{})", attempt, max_retries);
+                }
+                crate::i18n::Language::Russian => {
+                    let _ = write!(buf, "Повтор ({}/{})", attempt, max_retries);
+                }
+            }
         }
         TurnActivity::WritingToolCall(writing) => buf.push_str(&writing.label()),
         TurnActivity::Waiting(reason) => buf.push_str(&reason.label()),

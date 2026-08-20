@@ -81,6 +81,66 @@ pub enum TextKey {
     WaitingForLogin,
     WaitingForApproval,
     SelectUrlManual,
+
+    // Turn activity & status
+    Thinking,
+    Responding,
+    Compacting,
+    Verifying,
+    Cancelling,
+    Running,
+    Waiting,
+    WaitingForResponse,
+    WaitingOnSubagent,
+    WaitingOnTaskOutput,
+    WaitingOnTasks,
+    Sleeping,
+    StartingSession,
+    SendToBg,
+    Stop,
+    PressAgainTo,
+
+    // Tool writing status
+    WritingSubagentPrompt,
+    PreparingMcpTool,
+    SearchingMcpTools,
+    WritingFile,
+    WritingEdit,
+    WritingCommand,
+    UpdatingTodoList,
+    WritingWorkflow,
+    WritingImagePrompt,
+    WritingVideoPrompt,
+    PreparingQuestion,
+    PreparingToolCall,
+
+    // Tool execution status prefixes
+    SearchPrefix,
+    FetchPrefix,
+    RunPrefix,
+    WaitingOnAnswersFor,
+    ActionRequired,
+
+    // Watchers
+    StillRunning,
+    SendAMessageToInterrupt,
+    Queued,
+    EnterToSendNow,
+
+    // Welcome menu & dialogs
+    NewWorktree,
+    ResumeSession,
+    Changelog,
+    ImportClaudeSettings,
+    Logout,
+    UpgradeSubscription,
+    Save,
+    SaveAndSend,
+    DiscardChanges,
+    DiscardAndSend,
+    DeletePrompt,
+    Cancel,
+    Reset,
 }
 
 /// Translate a static UI string using the current application language.
@@ -176,6 +236,116 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::SelectUrlManual) => {
             "Выделите URL ниже мышью и скопируйте его вручную."
         }
+
+        // Turn activity & status
+        (Language::English, TextKey::Thinking) => "Thinking…",
+        (Language::Russian, TextKey::Thinking) => "Размышляет…",
+        (Language::English, TextKey::Responding) => "Responding…",
+        (Language::Russian, TextKey::Responding) => "Отвечает…",
+        (Language::English, TextKey::Compacting) => "Compacting…",
+        (Language::Russian, TextKey::Compacting) => "Сжатие контекста…",
+        (Language::English, TextKey::Verifying) => "Verifying…",
+        (Language::Russian, TextKey::Verifying) => "Проверка…",
+        (Language::English, TextKey::Cancelling) => "Cancelling…",
+        (Language::Russian, TextKey::Cancelling) => "Отмена…",
+        (Language::English, TextKey::Running) => "Running…",
+        (Language::Russian, TextKey::Running) => "Выполнение…",
+        (Language::English, TextKey::Waiting) => "Waiting…",
+        (Language::Russian, TextKey::Waiting) => "Ожидание…",
+        (Language::English, TextKey::WaitingForResponse) => "Waiting for response…",
+        (Language::Russian, TextKey::WaitingForResponse) => "Ожидание ответа модели…",
+        (Language::English, TextKey::WaitingOnSubagent) => "Waiting on subagent…",
+        (Language::Russian, TextKey::WaitingOnSubagent) => "Ожидание субагента…",
+        (Language::English, TextKey::WaitingOnTaskOutput) => "Waiting on task output…",
+        (Language::Russian, TextKey::WaitingOnTaskOutput) => "Ожидание вывода задачи…",
+        (Language::English, TextKey::WaitingOnTasks) => "Waiting on tasks…",
+        (Language::Russian, TextKey::WaitingOnTasks) => "Ожидание завершения задач…",
+        (Language::English, TextKey::Sleeping) => "Sleeping…",
+        (Language::Russian, TextKey::Sleeping) => "Ожидание по таймеру…",
+        (Language::English, TextKey::StartingSession) => "Starting session…",
+        (Language::Russian, TextKey::StartingSession) => "Запуск сессии…",
+        (Language::English, TextKey::SendToBg) => "send to bg",
+        (Language::Russian, TextKey::SendToBg) => "в фон",
+        (Language::English, TextKey::Stop) => "stop",
+        (Language::Russian, TextKey::Stop) => "стоп",
+        (Language::English, TextKey::PressAgainTo) => "press again to ",
+        (Language::Russian, TextKey::PressAgainTo) => "нажмите ещё раз для ",
+
+        // Tool writing status
+        (Language::English, TextKey::WritingSubagentPrompt) => "Writing subagent prompt",
+        (Language::Russian, TextKey::WritingSubagentPrompt) => "Формирование запроса субагенту",
+        (Language::English, TextKey::PreparingMcpTool) => "Preparing MCP tool",
+        (Language::Russian, TextKey::PreparingMcpTool) => "Подготовка инструмента MCP",
+        (Language::English, TextKey::SearchingMcpTools) => "Searching MCP tools",
+        (Language::Russian, TextKey::SearchingMcpTools) => "Поиск инструментов MCP",
+        (Language::English, TextKey::WritingFile) => "Writing file",
+        (Language::Russian, TextKey::WritingFile) => "Запись файла",
+        (Language::English, TextKey::WritingEdit) => "Writing edit",
+        (Language::Russian, TextKey::WritingEdit) => "Подготовка правок",
+        (Language::English, TextKey::WritingCommand) => "Writing command",
+        (Language::Russian, TextKey::WritingCommand) => "Формирование команды",
+        (Language::English, TextKey::UpdatingTodoList) => "Updating todo list",
+        (Language::Russian, TextKey::UpdatingTodoList) => "Обновление списка задач",
+        (Language::English, TextKey::WritingWorkflow) => "Writing workflow",
+        (Language::Russian, TextKey::WritingWorkflow) => "Подготовка воркфлоу",
+        (Language::English, TextKey::WritingImagePrompt) => "Writing image prompt",
+        (Language::Russian, TextKey::WritingImagePrompt) => "Формирование промпта для изображения",
+        (Language::English, TextKey::WritingVideoPrompt) => "Writing video prompt",
+        (Language::Russian, TextKey::WritingVideoPrompt) => "Формирование промпта для видео",
+        (Language::English, TextKey::PreparingQuestion) => "Preparing question",
+        (Language::Russian, TextKey::PreparingQuestion) => "Подготовка вопроса",
+        (Language::English, TextKey::PreparingToolCall) => "Preparing tool call",
+        (Language::Russian, TextKey::PreparingToolCall) => "Подготовка вызова инструмента",
+
+        // Tool execution status prefixes
+        (Language::English, TextKey::SearchPrefix) => "Search ",
+        (Language::Russian, TextKey::SearchPrefix) => "Поиск: ",
+        (Language::English, TextKey::FetchPrefix) => "Fetch ",
+        (Language::Russian, TextKey::FetchPrefix) => "Загрузка: ",
+        (Language::English, TextKey::RunPrefix) => "Run ",
+        (Language::Russian, TextKey::RunPrefix) => "Запуск: ",
+        (Language::English, TextKey::WaitingOnAnswersFor) => "Waiting on answers for ",
+        (Language::Russian, TextKey::WaitingOnAnswersFor) => "Ожидание ответа на: ",
+        (Language::English, TextKey::ActionRequired) => "Action Required",
+        (Language::Russian, TextKey::ActionRequired) => "Требуется действие",
+
+        // Watchers
+        (Language::English, TextKey::StillRunning) => "still running",
+        (Language::Russian, TextKey::StillRunning) => "работает в фоне",
+        (Language::English, TextKey::SendAMessageToInterrupt) => "send a message to interrupt",
+        (Language::Russian, TextKey::SendAMessageToInterrupt) => "отправьте сообщение для прерывания",
+        (Language::English, TextKey::Queued) => "queued",
+        (Language::Russian, TextKey::Queued) => "в очереди",
+        (Language::English, TextKey::EnterToSendNow) => "Enter to send now",
+        (Language::Russian, TextKey::EnterToSendNow) => "Enter — отправить сейчас",
+
+        // Welcome menu & dialogs
+        (Language::English, TextKey::NewWorktree) => "New worktree",
+        (Language::Russian, TextKey::NewWorktree) => "Новое рабочее дерево",
+        (Language::English, TextKey::ResumeSession) => "Resume session",
+        (Language::Russian, TextKey::ResumeSession) => "Возобновить сессию",
+        (Language::English, TextKey::Changelog) => "Changelog",
+        (Language::Russian, TextKey::Changelog) => "Список изменений",
+        (Language::English, TextKey::ImportClaudeSettings) => "Import Claude settings",
+        (Language::Russian, TextKey::ImportClaudeSettings) => "Импортировать настройки Claude",
+        (Language::English, TextKey::Logout) => "Logout",
+        (Language::Russian, TextKey::Logout) => "Выйти из аккаунта",
+        (Language::English, TextKey::UpgradeSubscription) => "Upgrade Subscription",
+        (Language::Russian, TextKey::UpgradeSubscription) => "Улучшить подписку",
+        (Language::English, TextKey::Save) => "save",
+        (Language::Russian, TextKey::Save) => "сохранить",
+        (Language::English, TextKey::SaveAndSend) => "save & send",
+        (Language::Russian, TextKey::SaveAndSend) => "сохранить и отправить",
+        (Language::English, TextKey::DiscardChanges) => "discard changes",
+        (Language::Russian, TextKey::DiscardChanges) => "отменить изменения",
+        (Language::English, TextKey::DiscardAndSend) => "discard & send",
+        (Language::Russian, TextKey::DiscardAndSend) => "отменить и отправить",
+        (Language::English, TextKey::DeletePrompt) => "delete prompt",
+        (Language::Russian, TextKey::DeletePrompt) => "удалить запрос",
+        (Language::English, TextKey::Cancel) => "cancel",
+        (Language::Russian, TextKey::Cancel) => "отмена",
+        (Language::English, TextKey::Reset) => "reset",
+        (Language::Russian, TextKey::Reset) => "сбросить",
     };
 
     Cow::Borrowed(text)
@@ -188,12 +358,111 @@ pub fn language_name() -> &'static str {
     }
 }
 
+pub fn format_count_noun(count: usize, noun_en: &str) -> String {
+    match language() {
+        Language::English => {
+            let plural = if count == 1 { "" } else { "s" };
+            format!("{count} {noun_en}{plural}")
+        }
+        Language::Russian => {
+            let noun_ru = match noun_en {
+                "command" => match russian_plural_form(count) {
+                    PluralForm::One => "команда",
+                    PluralForm::Few => "команды",
+                    PluralForm::Many => "команд",
+                },
+                "monitor" => match russian_plural_form(count) {
+                    PluralForm::One => "монитор",
+                    PluralForm::Few => "монитора",
+                    PluralForm::Many => "мониторов",
+                },
+                "loop" => match russian_plural_form(count) {
+                    PluralForm::One => "цикл",
+                    PluralForm::Few => "цикла",
+                    PluralForm::Many => "циклов",
+                },
+                "subagent" => match russian_plural_form(count) {
+                    PluralForm::One => "субагент",
+                    PluralForm::Few => "субагента",
+                    PluralForm::Many => "субагентов",
+                },
+                "workflow" => match russian_plural_form(count) {
+                    PluralForm::One => "воркфлоу",
+                    PluralForm::Few => "воркфлоу",
+                    PluralForm::Many => "воркфлоу",
+                },
+                "file" => match russian_plural_form(count) {
+                    PluralForm::One => "файл",
+                    PluralForm::Few => "файла",
+                    PluralForm::Many => "файлов",
+                },
+                "skill" => match russian_plural_form(count) {
+                    PluralForm::One => "навык",
+                    PluralForm::Few => "навыка",
+                    PluralForm::Many => "навыков",
+                },
+                "pattern" => match russian_plural_form(count) {
+                    PluralForm::One => "шаблон",
+                    PluralForm::Few => "шаблона",
+                    PluralForm::Many => "шаблонов",
+                },
+                "dir" => match russian_plural_form(count) {
+                    PluralForm::One => "каталог",
+                    PluralForm::Few => "каталога",
+                    PluralForm::Many => "каталогов",
+                },
+                "website" => match russian_plural_form(count) {
+                    PluralForm::One => "сайт",
+                    PluralForm::Few => "сайта",
+                    PluralForm::Many => "сайтов",
+                },
+                "memory" => match russian_plural_form(count) {
+                    PluralForm::One => "запись памяти",
+                    PluralForm::Few => "записи памяти",
+                    PluralForm::Many => "записей памяти",
+                },
+                "MCP tool" => match russian_plural_form(count) {
+                    PluralForm::One => "инструмент MCP",
+                    PluralForm::Few => "инструмента MCP",
+                    PluralForm::Many => "инструментов MCP",
+                },
+                "tool" => match russian_plural_form(count) {
+                    PluralForm::One => "инструмент",
+                    PluralForm::Few => "инструмента",
+                    PluralForm::Many => "инструментов",
+                },
+                other => other,
+            };
+            format!("{count} {noun_ru}")
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PluralForm {
+    One,
+    Few,
+    Many,
+}
+
+pub fn russian_plural_form(n: usize) -> PluralForm {
+    let n10 = n % 10;
+    let n100 = n % 100;
+    if n10 == 1 && n100 != 11 {
+        PluralForm::One
+    } else if (2..=4).contains(&n10) && !(12..=14).contains(&n100) {
+        PluralForm::Few
+    } else {
+        PluralForm::Many
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn every_iteration_one_key_has_both_translations() {
+    fn every_key_has_both_translations() {
         let values = [
             TextKey::AuthBrowserHeader,
             TextKey::AuthDeviceHeader,
@@ -218,11 +487,73 @@ mod tests {
             TextKey::WaitingForLogin,
             TextKey::WaitingForApproval,
             TextKey::SelectUrlManual,
+            TextKey::Thinking,
+            TextKey::Responding,
+            TextKey::Compacting,
+            TextKey::Verifying,
+            TextKey::Cancelling,
+            TextKey::Running,
+            TextKey::Waiting,
+            TextKey::WaitingForResponse,
+            TextKey::WaitingOnSubagent,
+            TextKey::WaitingOnTaskOutput,
+            TextKey::WaitingOnTasks,
+            TextKey::Sleeping,
+            TextKey::StartingSession,
+            TextKey::SendToBg,
+            TextKey::Stop,
+            TextKey::PressAgainTo,
+            TextKey::WritingSubagentPrompt,
+            TextKey::PreparingMcpTool,
+            TextKey::SearchingMcpTools,
+            TextKey::WritingFile,
+            TextKey::WritingEdit,
+            TextKey::WritingCommand,
+            TextKey::UpdatingTodoList,
+            TextKey::WritingWorkflow,
+            TextKey::WritingImagePrompt,
+            TextKey::WritingVideoPrompt,
+            TextKey::PreparingQuestion,
+            TextKey::PreparingToolCall,
+            TextKey::SearchPrefix,
+            TextKey::FetchPrefix,
+            TextKey::RunPrefix,
+            TextKey::WaitingOnAnswersFor,
+            TextKey::ActionRequired,
+            TextKey::StillRunning,
+            TextKey::SendAMessageToInterrupt,
+            TextKey::Queued,
+            TextKey::EnterToSendNow,
+            TextKey::NewWorktree,
+            TextKey::ResumeSession,
+            TextKey::Changelog,
+            TextKey::ImportClaudeSettings,
+            TextKey::Logout,
+            TextKey::UpgradeSubscription,
+            TextKey::Save,
+            TextKey::SaveAndSend,
+            TextKey::DiscardChanges,
+            TextKey::DiscardAndSend,
+            TextKey::DeletePrompt,
+            TextKey::Cancel,
+            TextKey::Reset,
         ];
 
         for key in values {
             assert!(!tr_for(Language::English, key).is_empty());
             assert!(!tr_for(Language::Russian, key).is_empty());
         }
+    }
+
+    #[test]
+    fn russian_pluralization_tests() {
+        assert_eq!(russian_plural_form(1), PluralForm::One);
+        assert_eq!(russian_plural_form(21), PluralForm::One);
+        assert_eq!(russian_plural_form(2), PluralForm::Few);
+        assert_eq!(russian_plural_form(4), PluralForm::Few);
+        assert_eq!(russian_plural_form(5), PluralForm::Many);
+        assert_eq!(russian_plural_form(11), PluralForm::Many);
+        assert_eq!(russian_plural_form(12), PluralForm::Many);
+        assert_eq!(russian_plural_form(25), PluralForm::Many);
     }
 }

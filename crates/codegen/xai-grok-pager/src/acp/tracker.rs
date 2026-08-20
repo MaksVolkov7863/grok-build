@@ -109,7 +109,7 @@ pub fn clamp_activity_subject(s: &str) -> String {
 pub fn format_waiting_for_subject(subject: &str) -> String {
     let clamped = clamp_activity_subject(subject);
     if clamped.is_empty() {
-        "Waiting on task output…".to_string()
+        crate::i18n::tr(crate::i18n::TextKey::WaitingOnTaskOutput).into_owned()
     } else {
         format!("{clamped}…")
     }
@@ -130,18 +130,22 @@ impl WaitingReason {
     /// User-facing spinner label.
     pub fn label(&self) -> String {
         match self {
-            Self::Model => "Waiting for response…".to_string(),
+            Self::Model => crate::i18n::tr(crate::i18n::TextKey::WaitingForResponse).into_owned(),
             Self::Subagent { display } => match display.as_deref().map(clamp_activity_subject) {
                 Some(display) if !display.is_empty() => format!("{display}…"),
-                _ => "Waiting on subagent…".to_string(),
+                _ => crate::i18n::tr(crate::i18n::TextKey::WaitingOnSubagent).into_owned(),
             },
             Self::TaskOutput {
                 subject: Some(subject),
                 ..
             } => format_waiting_for_subject(subject),
-            Self::TaskOutput { .. } => "Waiting on task output…".to_string(),
-            Self::TasksComplete => "Waiting on tasks…".to_string(),
-            Self::Sleep => "Sleeping…".to_string(),
+            Self::TaskOutput { .. } => {
+                crate::i18n::tr(crate::i18n::TextKey::WaitingOnTaskOutput).into_owned()
+            }
+            Self::TasksComplete => {
+                crate::i18n::tr(crate::i18n::TextKey::WaitingOnTasks).into_owned()
+            }
+            Self::Sleep => crate::i18n::tr(crate::i18n::TextKey::Sleeping).into_owned(),
         }
     }
     /// Short, stable snake_case label for telemetry / phase-transition logs.
@@ -177,35 +181,39 @@ pub struct WritingToolCall {
 impl WritingToolCall {
     /// User-facing spinner label.
     pub fn label(&self) -> String {
+        use crate::i18n::{TextKey, tr};
         let ordinal = match self.ordinal.get() {
             1 => String::new(),
             n => format!(" ({n})"),
         };
         match self.tool_name.as_deref() {
             Some(name) if xai_grok_tools::is_task_tool_id(name) => {
-                format!("Writing subagent prompt{ordinal}…")
+                let prefix = tr(TextKey::WritingSubagentPrompt);
+                format!("{prefix}{ordinal}…")
             }
             Some(xai_grok_tools::USE_TOOL_NAME) => {
-                format!("Preparing MCP tool{ordinal}…")
+                let prefix = tr(TextKey::PreparingMcpTool);
+                format!("{prefix}{ordinal}…")
             }
             Some(xai_grok_tools::SEARCH_TOOL_NAME) => {
-                format!("Searching MCP tools{ordinal}…")
+                let prefix = tr(TextKey::SearchingMcpTools);
+                format!("{prefix}{ordinal}…")
             }
             Some(name) => {
                 use xai_grok_tools::types::tool::ToolKind;
                 let copy =
                     xai_grok_tools::tool_taxonomy::writing_tool_kind(name).and_then(|kind| {
                         match kind {
-                            ToolKind::Write => Some("Writing file"),
-                            ToolKind::Edit => Some("Writing edit"),
-                            ToolKind::Execute => Some("Writing command"),
-                            ToolKind::Plan => Some("Updating todo list"),
-                            ToolKind::Workflow => Some("Writing workflow"),
-                            ToolKind::ImageGen => Some("Writing image prompt"),
+                            ToolKind::Write => Some(tr(TextKey::WritingFile)),
+                            ToolKind::Edit => Some(tr(TextKey::WritingEdit)),
+                            ToolKind::Execute => Some(tr(TextKey::WritingCommand)),
+                            ToolKind::Plan => Some(tr(TextKey::UpdatingTodoList)),
+                            ToolKind::Workflow => Some(tr(TextKey::WritingWorkflow)),
+                            ToolKind::ImageGen => Some(tr(TextKey::WritingImagePrompt)),
                             ToolKind::ImageToVideo | ToolKind::ReferenceToVideo => {
-                                Some("Writing video prompt")
+                                Some(tr(TextKey::WritingVideoPrompt))
                             }
-                            ToolKind::AskUser => Some("Preparing question"),
+                            ToolKind::AskUser => Some(tr(TextKey::PreparingQuestion)),
                             _ => None,
                         }
                     });
@@ -214,11 +222,20 @@ impl WritingToolCall {
                     None => {
                         let name =
                             xai_grok_workspace::permission::mcp_pretty_name_if_qualified(name);
-                        format!("Preparing {}{ordinal}…", clamp_activity_subject(&name))
+                        let prep = tr(TextKey::PreparingToolCall);
+                        let prep_prefix = if prep.contains(' ') {
+                            prep.split_whitespace().next().unwrap_or("Preparing")
+                        } else {
+                            "Preparing"
+                        };
+                        format!("{prep_prefix} {}{ordinal}…", clamp_activity_subject(&name))
                     }
                 }
             }
-            None => format!("Preparing tool call{ordinal}…"),
+            None => {
+                let prefix = tr(TextKey::PreparingToolCall);
+                format!("{prefix}{ordinal}…")
+            }
         }
     }
 }

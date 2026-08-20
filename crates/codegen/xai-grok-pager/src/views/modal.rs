@@ -52,14 +52,15 @@ pub enum EditConfirmResult {
 }
 impl EditConfirmResult {
     /// Dynamic label based on whether the agent is waiting to drain.
-    pub fn label(&self, drain_blocked: bool) -> &'static str {
+    pub fn label(&self, drain_blocked: bool) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match (self, drain_blocked) {
-            (Self::Save, false) => "save",
-            (Self::Save, true) => "save & send",
-            (Self::Discard, false) => "discard changes",
-            (Self::Discard, true) => "discard & send",
-            (Self::Delete, _) => "delete prompt",
-            (Self::Cancel, _) => "cancel",
+            (Self::Save, false) => tr(TextKey::Save),
+            (Self::Save, true) => tr(TextKey::SaveAndSend),
+            (Self::Discard, false) => tr(TextKey::DiscardChanges),
+            (Self::Discard, true) => tr(TextKey::DiscardAndSend),
+            (Self::Delete, _) => tr(TextKey::DeletePrompt),
+            (Self::Cancel, _) => tr(TextKey::Cancel),
         }
     }
 }
@@ -98,10 +99,11 @@ pub enum ResetSettingsResult {
 }
 impl ResetSettingsResult {
     /// Label for the y/n buttons rendered in the modal footer.
-    pub fn label(self) -> &'static str {
+    pub fn label(self) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self {
-            Self::Reset => "reset",
-            Self::Cancel => "cancel",
+            Self::Reset => tr(TextKey::Reset),
+            Self::Cancel => tr(TextKey::Cancel),
         }
     }
 }

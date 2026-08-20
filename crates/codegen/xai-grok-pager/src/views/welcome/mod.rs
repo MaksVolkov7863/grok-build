@@ -86,10 +86,11 @@ pub(super) fn render_pending_hint(
         .fg(theme.text_primary)
         .add_modifier(Modifier::BOLD);
     let action_style = Style::default().fg(theme.gray);
+    let prefix = crate::i18n::tr(crate::i18n::TextKey::PressAgainTo);
     let line = Line::from(vec![
         Span::styled(format!("  {}", pending.shortcut.display()), key_style),
         Span::styled(":", action_style),
-        Span::styled(format!("press again to {}", pending.label), action_style),
+        Span::styled(format!("{prefix}{}", pending.label), action_style),
     ]);
     buf.set_line(area.x, area.y, &line, area.width);
 }
@@ -1761,11 +1762,16 @@ fn render_welcome_done(
     // frame so the menu doesn't shift while the CDN fetch completes.
     let show_changelog_action = p.has_access && !show_picker;
 
-    let gate_menu;
-    let owned_menu;
-    let menu_items: &[(&str, &str)] = if !p.has_access {
-        gate_menu = [(key_g, cta), (key_l, "Logout"), (key_q, "Quit")];
-        &gate_menu
+    let gate_menu: [(&str, std::borrow::Cow<'static, str>); 3];
+    let owned_menu: Vec<(&str, std::borrow::Cow<'static, str>)>;
+    use crate::i18n::{TextKey, tr};
+    let menu_items_tuples: Vec<(&str, std::borrow::Cow<'static, str>)> = if !p.has_access {
+        gate_menu = [
+            (key_g, std::borrow::Cow::Borrowed(cta)),
+            (key_l, tr(TextKey::Logout)),
+            (key_q, tr(TextKey::QuitLabel)),
+        ];
+        gate_menu.to_vec()
     } else {
         let (key_w, key_s, key_q, key_i_with_x) = (
             "ctrl+w",
@@ -1773,27 +1779,24 @@ fn render_welcome_done(
             if in_vscode_family { "ctrl+d" } else { "ctrl+q" },
             "ctrl+i  [x]",
         );
-        // Insert the import row at the top when there are pending `.claude/`
-        // settings to import — it's the most actionable item right now.
-        let mut items: Vec<(&str, &str)> = Vec::with_capacity(5);
+        let mut items = Vec::with_capacity(5);
         if p.has_claude_import {
-            // The trailing "[x]" is a clickable dismiss affordance — the
-            // welcome screen mouse handler treats clicks on the rightmost
-            // 3 cells of this row as dismiss instead of open. Keyboard:
-            // ctrl-shift-i. The key string is right-aligned by render_menu,
-            // so [x] sits at the very end of the row.
-            items.push((key_i_with_x, "Import Claude settings"));
+            items.push((key_i_with_x, tr(TextKey::ImportClaudeSettings)));
         }
-        items.push((key_w, "New worktree"));
-        items.push((key_s, "Resume session"));
-        // "Changelog" above Quit; no shortcut — opened by click (row or block).
+        items.push((key_w, tr(TextKey::NewWorktree)));
+        items.push((key_s, tr(TextKey::ResumeSession)));
         if show_changelog_action {
-            items.push(("", "Changelog"));
+            items.push(("", tr(TextKey::Changelog)));
         }
-        items.push((key_q, "Quit"));
+        items.push((key_q, tr(TextKey::QuitLabel)));
         owned_menu = items;
-        owned_menu.as_slice()
+        owned_menu
     };
+    let menu_items_ref: Vec<(&str, &str)> = menu_items_tuples
+        .iter()
+        .map(|(k, v)| (*k, v.as_ref()))
+        .collect();
+    let menu_items = menu_items_ref.as_slice();
 
     #[cfg(feature = "local-workspace")]
     // Keep the segmented control (and ACK y/N) visible when history is open
