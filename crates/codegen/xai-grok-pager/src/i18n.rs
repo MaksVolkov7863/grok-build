@@ -391,6 +391,31 @@ pub enum TextKey {
     TipPrefix,
     TipAttachFiles,
     TipFreshWorktree,
+
+    // Toasts & Notifications
+    ToastCopiedImage,
+    ToastOpeningDefaultApp,
+    ToastCouldNotOpenFile,
+    ToastLoadingVideo,
+    ToastNoPlanYet,
+    ToastPlanRevisionSent,
+    ToastPlanFeedbackSent,
+    ToastNoCommentsToSend,
+    ToastCantSendMidTurn,
+    ToastDiagramNotReady,
+    ToastRenderingDiagram,
+    ToastCouldNotRenderDiagram,
+    ToastBrowserUnavailable,
+
+    // Workspace mode
+    WorkspaceLabel,
+    WorkspaceSandbox,
+    WorkspaceLocal,
+    WorkspaceSandboxHint,
+    WorkspaceLocalHint,
+    WorkspaceConfirmLocal,
+    WorkspaceLockedCli,
+    QuestionDetailPlaceholder,
 }
 
 /// Translate a static UI string using the current application language.
@@ -1013,6 +1038,64 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         }
         (Language::Russian, TextKey::TipFreshWorktree) => {
             "Запустите Grok в новом worktree через `-w`; добавьте `-r <session-id>` для возобновления сессии."
+        }
+
+        // Toasts & Notifications
+        (Language::English, TextKey::ToastCopiedImage) => "Copied image",
+        (Language::Russian, TextKey::ToastCopiedImage) => "Изображение скопировано",
+        (Language::English, TextKey::ToastOpeningDefaultApp) => "Opening in default app…",
+        (Language::Russian, TextKey::ToastOpeningDefaultApp) => "Открытие в приложении по умолчанию…",
+        (Language::English, TextKey::ToastCouldNotOpenFile) => "Could not open file",
+        (Language::Russian, TextKey::ToastCouldNotOpenFile) => "Не удалось открыть файл",
+        (Language::English, TextKey::ToastLoadingVideo) => "Loading video…",
+        (Language::Russian, TextKey::ToastLoadingVideo) => "Загрузка видео…",
+        (Language::English, TextKey::ToastNoPlanYet) => "No plan written yet.",
+        (Language::Russian, TextKey::ToastNoPlanYet) => "План ещё не составлен.",
+        (Language::English, TextKey::ToastPlanRevisionSent) => "Plan revision sent.",
+        (Language::Russian, TextKey::ToastPlanRevisionSent) => "Запрос на изменение плана отправлен.",
+        (Language::English, TextKey::ToastPlanFeedbackSent) => "Plan feedback sent.",
+        (Language::Russian, TextKey::ToastPlanFeedbackSent) => "Отзыв о плане отправлен.",
+        (Language::English, TextKey::ToastNoCommentsToSend) => "No comments to send.",
+        (Language::Russian, TextKey::ToastNoCommentsToSend) => "Нет комментариев для отправки.",
+        (Language::English, TextKey::ToastCantSendMidTurn) => {
+            "Can't send this mid-turn — it runs when the current turn ends"
+        }
+        (Language::Russian, TextKey::ToastCantSendMidTurn) => {
+            "Нельзя отправить посреди шага — выполнится после завершения"
+        }
+        (Language::English, TextKey::ToastDiagramNotReady) => "Diagram not ready yet",
+        (Language::Russian, TextKey::ToastDiagramNotReady) => "Диаграмма ещё не готова",
+        (Language::English, TextKey::ToastRenderingDiagram) => "Rendering diagram…",
+        (Language::Russian, TextKey::ToastRenderingDiagram) => "Отрисовка диаграммы…",
+        (Language::English, TextKey::ToastCouldNotRenderDiagram) => "Could not render diagram",
+        (Language::Russian, TextKey::ToastCouldNotRenderDiagram) => "Не удалось отрисовать диаграмму",
+        (Language::English, TextKey::ToastBrowserUnavailable) => {
+            "Browser unavailable - URL shown above"
+        }
+        (Language::Russian, TextKey::ToastBrowserUnavailable) => {
+            "Браузер недоступен — ссылка показана выше"
+        }
+
+        // Workspace mode
+        (Language::English, TextKey::WorkspaceLabel) => "Workspace  ",
+        (Language::Russian, TextKey::WorkspaceLabel) => "Окружение   ",
+        (Language::English, TextKey::WorkspaceSandbox) => "Sandbox",
+        (Language::Russian, TextKey::WorkspaceSandbox) => "Песочница",
+        (Language::English, TextKey::WorkspaceLocal) => "Local workspace",
+        (Language::Russian, TextKey::WorkspaceLocal) => "Локальное",
+        (Language::English, TextKey::WorkspaceSandboxHint) => "backend sandbox",
+        (Language::Russian, TextKey::WorkspaceSandboxHint) => "песочница на сервере",
+        (Language::English, TextKey::WorkspaceLocalHint) => "this machine · Computer Hub",
+        (Language::Russian, TextKey::WorkspaceLocalHint) => "этот компьютер · Computer Hub",
+        (Language::English, TextKey::WorkspaceConfirmLocal) => "  confirm local workspace? y/N",
+        (Language::Russian, TextKey::WorkspaceConfirmLocal) => "  подтвердить локальное окружение? y/N",
+        (Language::English, TextKey::WorkspaceLockedCli) => "  locked by CLI",
+        (Language::Russian, TextKey::WorkspaceLockedCli) => "  зафиксировано параметром CLI",
+        (Language::English, TextKey::QuestionDetailPlaceholder) => {
+            "Please provide as much detail as possible."
+        }
+        (Language::Russian, TextKey::QuestionDetailPlaceholder) => {
+            "Пожалуйста, укажите как можно больше подробностей."
         }
     };
 

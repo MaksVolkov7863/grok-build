@@ -360,7 +360,8 @@ impl AgentView {
                 // Best-effort clipboard so SSH/VM users can paste into a
                 // browser on another machine without selecting TUI text.
                 let _ = crate::clipboard::SystemClipboard::try_set(url);
-                self.show_toast("Browser unavailable - URL shown above");
+                use crate::i18n::{TextKey, tr};
+                self.show_toast(tr(TextKey::ToastBrowserUnavailable).as_ref());
             }
         }
     }

@@ -1097,8 +1097,8 @@ impl AgentView {
                 "mermaid.render.not_ready",
                 self.session.session_id.as_ref().map(|s| s.0.as_ref()),
                 Some(serde_json::json!({ "action": action.log_label() })),
-            );
-            self.show_toast("Diagram not ready yet");
+            use crate::i18n::{TextKey, tr};
+            self.show_toast(tr(TextKey::ToastDiagramNotReady).as_ref());
             return;
         };
 
@@ -1111,7 +1111,8 @@ impl AgentView {
             .as_ref()
             .is_some_and(|rt| rt.has_pending(&key, action))
         {
-            self.show_toast("Rendering diagram\u{2026}");
+            use crate::i18n::{TextKey, tr};
+            self.show_toast(tr(TextKey::ToastRenderingDiagram).as_ref());
             return;
         }
 
@@ -1149,7 +1150,8 @@ impl AgentView {
             if let Some(rt) = self.mermaid.as_mut() {
                 rt.pending.push(PendingMermaidAction { key, action });
             }
-            self.show_toast("Rendering diagram\u{2026}");
+            use crate::i18n::{TextKey, tr};
+            self.show_toast(tr(TextKey::ToastRenderingDiagram).as_ref());
         } else {
             tracing::warn!(
                 target: MERMAID_TRACING_TARGET,
@@ -1160,7 +1162,8 @@ impl AgentView {
                 self.session.session_id.as_ref().map(|s| s.0.as_ref()),
                 Some(serde_json::json!({ "action": action.log_label() })),
             );
-            self.show_toast("Could not render diagram");
+            use crate::i18n::{TextKey, tr};
+            self.show_toast(tr(TextKey::ToastCouldNotRenderDiagram).as_ref());
         }
     }
 
@@ -1196,7 +1199,8 @@ impl AgentView {
                             self.session.session_id.as_ref().map(|s| s.0.as_ref()),
                             Some(serde_json::json!({ "action": action.log_label() })),
                         );
-                        self.show_toast("Could not render diagram");
+                        use crate::i18n::{TextKey, tr};
+                        self.show_toast(tr(TextKey::ToastCouldNotRenderDiagram).as_ref());
                     }
                 }
             }

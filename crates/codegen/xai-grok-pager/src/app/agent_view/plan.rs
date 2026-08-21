@@ -141,7 +141,8 @@ impl AgentView {
         } else {
             None
         }) else {
-            self.show_toast("No plan written yet.");
+            use crate::i18n::{TextKey, tr};
+            self.show_toast(tr(TextKey::ToastNoPlanYet).as_ref());
             return;
         };
         viewer.kind = crate::views::file_search::line_viewer::LineViewerKind::PlanPreview;
@@ -343,7 +344,8 @@ impl AgentView {
         self.prompt.restore(pav.stashed_prompt);
         self.line_viewer = None;
         self.prompt.textarea.cancel_undo_group();
-        self.show_toast("Plan revision sent.");
+        use crate::i18n::{TextKey, tr};
+        self.show_toast(tr(TextKey::ToastPlanRevisionSent).as_ref());
         log_plan_submit("revise");
         InputOutcome::Changed
     }
@@ -741,8 +743,9 @@ impl AgentView {
         InputOutcome::Changed
     }
     pub(super) fn send_casual_plan_comments(&mut self) -> InputOutcome {
+        use crate::i18n::{TextKey, tr};
         if self.plan_comments.is_empty() {
-            self.show_toast("No comments to send.");
+            self.show_toast(tr(TextKey::ToastNoCommentsToSend).as_ref());
             return InputOutcome::Changed;
         }
         let plan_content = self.inline_plan_content().map(str::to_owned).or_else(|| {
@@ -757,7 +760,7 @@ impl AgentView {
         self.plan_comments.clear();
         self.plan_next_comment_id = 0;
         self.cancel_line_viewer();
-        self.show_toast("Plan feedback sent.");
+        self.show_toast(tr(TextKey::ToastPlanFeedbackSent).as_ref());
         InputOutcome::Action(Action::SendPrompt(text))
     }
 }

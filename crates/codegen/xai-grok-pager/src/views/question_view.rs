@@ -1201,7 +1201,9 @@ pub mod feedback_input {
             bg: PromptBg::Panel(theme.bg_light),
             chrome_pad_right: 2,
             placeholder_when_focused: true,
-            placeholder_override: Some(PLACEHOLDER),
+            placeholder_override: Some(crate::i18n::tr_static(
+                crate::i18n::TextKey::QuestionDetailPlaceholder,
+            )),
             ..PromptStyle::default()
         }
     }

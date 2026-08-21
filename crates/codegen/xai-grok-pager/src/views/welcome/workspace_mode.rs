@@ -35,15 +35,15 @@ impl WelcomeWorkspaceMode {
 
     pub fn label(self) -> &'static str {
         match self {
-            Self::Sandbox => "Sandbox",
-            Self::LocalWorkspace => "Local workspace",
+            Self::Sandbox => crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceSandbox),
+            Self::LocalWorkspace => crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceLocal),
         }
     }
 
     pub fn hint(self) -> &'static str {
         match self {
-            Self::Sandbox => "backend sandbox",
-            Self::LocalWorkspace => "this machine · Computer Hub",
+            Self::Sandbox => crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceSandboxHint),
+            Self::LocalWorkspace => crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceLocalHint),
         }
     }
 
@@ -239,9 +239,11 @@ pub fn render_workspace_mode_picker(
         .add_modifier(Modifier::BOLD);
     let locked_style = Style::default().fg(theme.gray);
 
-    buf.set_span(row.x, row.y, &Span::styled("Workspace  ", label_style), 11);
+    let ws_label = crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceLabel);
+    let ws_len = ws_label.len() as u16;
+    buf.set_span(row.x, row.y, &Span::styled(ws_label, label_style), ws_len);
 
-    let mut x = row.x.saturating_add(11);
+    let mut x = row.x.saturating_add(ws_len);
     let mut options = [None; 2];
 
     let modes: &[WelcomeWorkspaceMode] = if startup_locked {
@@ -295,10 +297,10 @@ pub fn render_workspace_mode_picker(
         }
     }
 
-    let trailing = if ack_pending {
-        "  confirm local workspace? y/N"
+    let trailing: &'static str = if ack_pending {
+        crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceConfirmLocal)
     } else if startup_locked {
-        "  locked by CLI"
+        crate::i18n::tr_static(crate::i18n::TextKey::WorkspaceLockedCli)
     } else {
         "  ctrl+e"
     };
