@@ -189,12 +189,13 @@ const GROUP_KIND_COUNT: usize = 4;
 
 impl GroupKind {
     /// Display label shown in the group header.
-    fn label(self) -> &'static str {
+    fn label(self) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self {
-            GroupKind::Workflows => "Workflows",
-            GroupKind::Subagents => "Subagents",
-            GroupKind::Tasks => "Tasks",
-            GroupKind::Watchers => "Watchers",
+            GroupKind::Workflows => tr(TextKey::TasksGroupWorkflows),
+            GroupKind::Subagents => tr(TextKey::TasksGroupSubagents),
+            GroupKind::Tasks => tr(TextKey::TasksGroupTasks),
+            GroupKind::Watchers => tr(TextKey::TasksGroupWatchers),
         }
     }
 

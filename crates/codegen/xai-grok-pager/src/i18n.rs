@@ -310,6 +310,16 @@ pub enum TextKey {
     SettingsCursor,
     SettingsStepSmall,
     SettingsStepLarge,
+
+    // Tasks Pane & Groups
+    TasksGroupWorkflows,
+    TasksGroupSubagents,
+    TasksGroupTasks,
+    TasksGroupWatchers,
+    TaskStatusRunning,
+    TaskStatusQueued,
+    TaskStatusStarting,
+    TaskStatusDueNow,
 }
 
 /// Translate a static UI string using the current application language.
@@ -811,6 +821,24 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::SettingsStepSmall) => "шаг ±1/±10",
         (Language::English, TextKey::SettingsStepLarge) => "±100/±1000 step",
         (Language::Russian, TextKey::SettingsStepLarge) => "шаг ±100/±1000",
+
+        // Tasks Pane & Groups
+        (Language::English, TextKey::TasksGroupWorkflows) => "Workflows",
+        (Language::Russian, TextKey::TasksGroupWorkflows) => "Рабочие процессы",
+        (Language::English, TextKey::TasksGroupSubagents) => "Subagents",
+        (Language::Russian, TextKey::TasksGroupSubagents) => "Субагенты",
+        (Language::English, TextKey::TasksGroupTasks) => "Tasks",
+        (Language::Russian, TextKey::TasksGroupTasks) => "Задачи",
+        (Language::English, TextKey::TasksGroupWatchers) => "Watchers",
+        (Language::Russian, TextKey::TasksGroupWatchers) => "Наблюдатели",
+        (Language::English, TextKey::TaskStatusRunning) => "running",
+        (Language::Russian, TextKey::TaskStatusRunning) => "выполняется",
+        (Language::English, TextKey::TaskStatusQueued) => "queued",
+        (Language::Russian, TextKey::TaskStatusQueued) => "в очереди",
+        (Language::English, TextKey::TaskStatusStarting) => "starting",
+        (Language::Russian, TextKey::TaskStatusStarting) => "запуск",
+        (Language::English, TextKey::TaskStatusDueNow) => "due now",
+        (Language::Russian, TextKey::TaskStatusDueNow) => "сейчас",
     };
 
     Cow::Borrowed(text)
