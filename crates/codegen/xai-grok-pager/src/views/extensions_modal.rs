@@ -505,13 +505,14 @@ impl ExtensionsTab {
     ];
 
     /// Display label for the tab bar.
-    pub fn label(self) -> &'static str {
+    pub fn label(self) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self {
-            Self::Hooks => "Hooks",
-            Self::Plugins => "Plugins",
-            Self::Marketplace => "Marketplace",
-            Self::Skills => "Skills",
-            Self::McpServers => "MCP Servers",
+            Self::Hooks => tr(TextKey::ExtTabHooks),
+            Self::Plugins => tr(TextKey::ExtTabPlugins),
+            Self::Marketplace => tr(TextKey::ExtTabMarketplace),
+            Self::Skills => tr(TextKey::ExtTabSkills),
+            Self::McpServers => tr(TextKey::ExtTabMcpServers),
         }
     }
 
@@ -2586,7 +2587,9 @@ pub fn render_extensions_modal(
     }
 
     // Tab labels and active index.
-    let labels: Vec<&str> = ExtensionsTab::ALL.iter().map(|t| t.label()).collect();
+    let labels_cow: Vec<std::borrow::Cow<'static, str>> =
+        ExtensionsTab::ALL.iter().map(|t| t.label()).collect();
+    let labels: Vec<&str> = labels_cow.iter().map(|c| c.as_ref()).collect();
     let active_idx = ExtensionsTab::ALL
         .iter()
         .position(|t| *t == state.active_tab)

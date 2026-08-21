@@ -320,6 +320,13 @@ pub enum TextKey {
     TaskStatusQueued,
     TaskStatusStarting,
     TaskStatusDueNow,
+
+    // Extensions Tabs
+    ExtTabHooks,
+    ExtTabPlugins,
+    ExtTabMarketplace,
+    ExtTabSkills,
+    ExtTabMcpServers,
 }
 
 /// Translate a static UI string using the current application language.
@@ -839,6 +846,18 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::TaskStatusStarting) => "запуск",
         (Language::English, TextKey::TaskStatusDueNow) => "due now",
         (Language::Russian, TextKey::TaskStatusDueNow) => "сейчас",
+
+        // Extensions Tabs
+        (Language::English, TextKey::ExtTabHooks) => "Hooks",
+        (Language::Russian, TextKey::ExtTabHooks) => "Хуки",
+        (Language::English, TextKey::ExtTabPlugins) => "Plugins",
+        (Language::Russian, TextKey::ExtTabPlugins) => "Плагины",
+        (Language::English, TextKey::ExtTabMarketplace) => "Marketplace",
+        (Language::Russian, TextKey::ExtTabMarketplace) => "Каталог",
+        (Language::English, TextKey::ExtTabSkills) => "Skills",
+        (Language::Russian, TextKey::ExtTabSkills) => "Навыки",
+        (Language::English, TextKey::ExtTabMcpServers) => "MCP Servers",
+        (Language::Russian, TextKey::ExtTabMcpServers) => "Серверы MCP",
     };
 
     Cow::Borrowed(text)
