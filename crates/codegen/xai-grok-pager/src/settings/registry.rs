@@ -59,16 +59,17 @@ impl SettingCategory {
     ];
 
     /// Section-header label as rendered in the modal.
-    pub fn label(&self) -> &'static str {
+    pub fn label(&self) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self {
-            Self::Appearance => "Appearance",
-            Self::Mouse => "Mouse",
-            Self::Editor => "Editor & Input",
-            Self::Agent => "Agent & Approval",
-            Self::Privacy => "Privacy",
-            Self::Models => "Models",
-            Self::Session => "Session",
-            Self::Advanced => "Advanced",
+            Self::Appearance => tr(TextKey::SettingCategoryAppearance),
+            Self::Mouse => tr(TextKey::SettingCategoryMouse),
+            Self::Editor => tr(TextKey::SettingCategoryEditor),
+            Self::Agent => tr(TextKey::SettingCategoryAgent),
+            Self::Privacy => tr(TextKey::SettingCategoryPrivacy),
+            Self::Models => tr(TextKey::SettingCategoryModels),
+            Self::Session => tr(TextKey::SettingCategorySession),
+            Self::Advanced => tr(TextKey::SettingCategoryAdvanced),
         }
     }
 }
