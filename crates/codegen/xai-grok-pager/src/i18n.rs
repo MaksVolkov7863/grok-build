@@ -51,7 +51,7 @@ impl Language {
         #[cfg(windows)]
         {
             #[link(name = "kernel32")]
-            extern "system" {
+            unsafe extern "system" {
                 fn GetUserDefaultUILanguage() -> u16;
                 fn GetUserDefaultLCID() -> u32;
                 fn GetSystemDefaultUILanguage() -> u16;
