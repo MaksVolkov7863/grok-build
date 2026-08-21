@@ -47,11 +47,32 @@ impl Language {
             }
         }
 
-        // On Windows, check Windows-specific locale indicators
+        // On Windows, check Windows Win32 UI language API and locale indicators
         #[cfg(windows)]
         {
+            #[link(name = "kernel32")]
+            extern "system" {
+                fn GetUserDefaultUILanguage() -> u16;
+                fn GetUserDefaultLCID() -> u32;
+                fn GetSystemDefaultUILanguage() -> u16;
+            }
+
+            unsafe {
+                let ui_lang = GetUserDefaultUILanguage();
+                let sys_lang = GetSystemDefaultUILanguage();
+                let lcid = GetUserDefaultLCID() & 0xFFFF;
+
+                // 0x0419 = Russian (ru-RU), 0x0422 = Ukrainian, 0x0423 = Belarusian, 0x043F = Kazakh
+                if ui_lang == 0x0419 || sys_lang == 0x0419 || lcid == 0x0419 {
+                    return Self::Russian;
+                }
+                // Primary language ID check (0x19 is LANG_RUSSIAN)
+                if (ui_lang & 0x3FF) == 0x19 || (sys_lang & 0x3FF) == 0x19 || (lcid & 0x3FF) == 0x19 {
+                    return Self::Russian;
+                }
+            }
+
             if let Ok(user) = env::var("USERNAME") {
-                // If username contains Cyrillic (e.g. "Никита"), it's an unmistakable Russian Windows install
                 if user.chars().any(|c| ('\u{0400}'..='\u{04FF}').contains(&c)) {
                     return Self::Russian;
                 }
