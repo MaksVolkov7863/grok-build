@@ -142,12 +142,13 @@ impl CancelTurnChoice {
         CancelTurnChoice::AlwaysStop,
         CancelTurnChoice::AlwaysContinue,
     ];
-    pub fn label(&self) -> &'static str {
+    pub fn label(&self) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self {
-            Self::StopRunning => "Stop running",
-            Self::ContinueToRun => "Continue to run",
-            Self::AlwaysStop => "Always stop",
-            Self::AlwaysContinue => "Always continue",
+            Self::StopRunning => tr(TextKey::CancelTurnStopRunning),
+            Self::ContinueToRun => tr(TextKey::CancelTurnContinueToRun),
+            Self::AlwaysStop => tr(TextKey::CancelTurnAlwaysStop),
+            Self::AlwaysContinue => tr(TextKey::CancelTurnAlwaysContinue),
         }
     }
 }
@@ -374,180 +375,187 @@ pub(crate) fn default_palette_entries(
     sharing_enabled: bool,
     slash: &crate::slash::SlashController,
 ) -> Vec<PaletteEntry> {
+    use crate::i18n::{TextKey, tr};
     let screen_mode = slash.screen_mode();
+    let sec_session = tr(TextKey::PaletteSectionSession).into_owned();
+    let sec_context = tr(TextKey::PaletteSectionContext).into_owned();
+    let sec_model_input = tr(TextKey::PaletteSectionModelInput).into_owned();
+    let sec_tools = tr(TextKey::PaletteSectionTools).into_owned();
+    let sec_other = tr(TextKey::PaletteSectionOther).into_owned();
+
     let mut entries = vec![
         // ── Session ──
         PaletteEntry {
-            label: "Session".into(),
+            label: sec_session.clone(),
             shortcut: String::new(),
-            command: PaletteCommand::SectionHeader("Session".into()),
+            command: PaletteCommand::SectionHeader(sec_session),
         },
         PaletteEntry {
-            label: "New Session".into(),
+            label: tr(TextKey::PaletteNewSession).into_owned(),
             shortcut: "Ctrl+N".into(),
             command: PaletteCommand::NewSession,
         },
         PaletteEntry {
-            label: "New Session in Worktree".into(),
+            label: tr(TextKey::PaletteNewSessionWorktree).into_owned(),
             shortcut: "Ctrl+P → worktree".into(),
             command: PaletteCommand::NewSessionInWorktree,
         },
         PaletteEntry {
-            label: "Agent Dashboard".into(),
+            label: tr(TextKey::PaletteAgentDashboard).into_owned(),
             shortcut: "/dashboard".into(),
             command: PaletteCommand::SlashCommand("/dashboard".into()),
         },
         PaletteEntry {
-            label: "Back to Home".into(),
+            label: tr(TextKey::PaletteBackToHome).into_owned(),
             shortcut: "/home".into(),
             command: PaletteCommand::Home,
         },
         PaletteEntry {
-            label: "Delete This Session".into(),
+            label: tr(TextKey::PaletteDeleteSession).into_owned(),
             shortcut: "/delete".into(),
             command: PaletteCommand::SlashCommand("/delete".into()),
         },
         PaletteEntry {
-            label: "Resume Session".into(),
+            label: tr(TextKey::PaletteResumeSession).into_owned(),
             shortcut: "/resume".into(),
             command: PaletteCommand::SlashCommand("/resume".into()),
         },
         PaletteEntry {
-            label: "Share Session".into(),
+            label: tr(TextKey::PaletteShareSession).into_owned(),
             shortcut: "/share".into(),
             command: PaletteCommand::SlashCommand("/share".into()),
         },
         PaletteEntry {
-            label: "Rename Session".into(),
+            label: tr(TextKey::PaletteRenameSession).into_owned(),
             shortcut: "/rename ".into(),
             command: PaletteCommand::SlashCommand("/rename ".into()),
         },
         PaletteEntry {
-            label: "Session Info".into(),
+            label: tr(TextKey::PaletteSessionInfo).into_owned(),
             shortcut: "/session-info".into(),
             command: PaletteCommand::SlashCommand("/session-info".into()),
         },
         PaletteEntry {
-            label: "Send Feedback".into(),
+            label: tr(TextKey::PaletteSendFeedback).into_owned(),
             shortcut: "/feedback".into(),
             command: PaletteCommand::SlashCommand("/feedback ".into()),
         },
         // ── Context ──
         PaletteEntry {
-            label: "Context".into(),
+            label: sec_context.clone(),
             shortcut: String::new(),
-            command: PaletteCommand::SectionHeader("Context".into()),
+            command: PaletteCommand::SectionHeader(sec_context),
         },
         PaletteEntry {
-            label: "Compact History".into(),
+            label: tr(TextKey::PaletteCompactHistory).into_owned(),
             shortcut: "/compact".into(),
             command: PaletteCommand::SlashCommand("/compact".into()),
         },
         PaletteEntry {
-            label: "Context Usage".into(),
+            label: tr(TextKey::PaletteContextUsage).into_owned(),
             shortcut: "/context".into(),
             command: PaletteCommand::SlashCommand("/context".into()),
         },
         PaletteEntry {
-            label: "View Plan".into(),
+            label: tr(TextKey::PaletteViewPlan).into_owned(),
             shortcut: "/view-plan".into(),
             command: PaletteCommand::SlashCommand("/view-plan".into()),
         },
         PaletteEntry {
-            label: "Memory".into(),
+            label: tr(TextKey::PaletteMemory).into_owned(),
             shortcut: "/memory".into(),
             command: PaletteCommand::Memory,
         },
         // ── Model & Input ──
         PaletteEntry {
-            label: "Model & Input".into(),
+            label: sec_model_input.clone(),
             shortcut: String::new(),
-            command: PaletteCommand::SectionHeader("Model & Input".into()),
+            command: PaletteCommand::SectionHeader(sec_model_input),
         },
         PaletteEntry {
-            label: "Switch Model".into(),
+            label: tr(TextKey::PaletteSwitchModel).into_owned(),
             shortcut: "/model".into(),
             command: PaletteCommand::SlashCommand("/model ".into()),
         },
         PaletteEntry {
-            label: "Always Approve Mode".into(),
+            label: tr(TextKey::PaletteAlwaysApproveMode).into_owned(),
             shortcut: "/always-approve".into(),
             command: PaletteCommand::SlashCommand("/always-approve".into()),
         },
         PaletteEntry {
-            label: "Multiline Input".into(),
+            label: tr(TextKey::PaletteMultilineInput).into_owned(),
             shortcut: "/multiline".into(),
             command: PaletteCommand::SlashCommand("/multiline".into()),
         },
         PaletteEntry {
-            label: "Edit Prompt in External Editor".into(),
+            label: tr(TextKey::PaletteEditPromptExternal).into_owned(),
             shortcut: "Ctrl+G".into(),
             command: PaletteCommand::EditPromptExternal,
         },
         // ── Tools ──
         PaletteEntry {
-            label: "Tools".into(),
+            label: sec_tools.clone(),
             shortcut: String::new(),
-            command: PaletteCommand::SectionHeader("Tools".into()),
+            command: PaletteCommand::SectionHeader(sec_tools),
         },
         PaletteEntry {
-            label: "Hooks".into(),
+            label: tr(TextKey::PaletteHooks).into_owned(),
             shortcut: "/hooks".into(),
             command: PaletteCommand::OpenExtensionsTab(
                 crate::views::extensions_modal::ExtensionsTab::Hooks,
             ),
         },
         PaletteEntry {
-            label: "Plugins".into(),
+            label: tr(TextKey::PalettePlugins).into_owned(),
             shortcut: "/plugins".into(),
             command: PaletteCommand::OpenExtensionsTab(
                 crate::views::extensions_modal::ExtensionsTab::Plugins,
             ),
         },
         PaletteEntry {
-            label: "Marketplace".into(),
+            label: tr(TextKey::PaletteMarketplace).into_owned(),
             shortcut: "/marketplace".into(),
             command: PaletteCommand::OpenExtensionsTab(
                 crate::views::extensions_modal::ExtensionsTab::Marketplace,
             ),
         },
         PaletteEntry {
-            label: "Skills".into(),
+            label: tr(TextKey::PaletteSkills).into_owned(),
             shortcut: "/skills".into(),
             command: PaletteCommand::OpenExtensionsTab(
                 crate::views::extensions_modal::ExtensionsTab::Skills,
             ),
         },
         PaletteEntry {
-            label: "MCP Servers".into(),
+            label: tr(TextKey::PaletteMcpServers).into_owned(),
             shortcut: "/mcps".into(),
             command: PaletteCommand::OpenExtensionsTab(
                 crate::views::extensions_modal::ExtensionsTab::McpServers,
             ),
         },
         PaletteEntry {
-            label: "Manage Agents".into(),
+            label: tr(TextKey::PaletteManageAgents).into_owned(),
             shortcut: "/config-agents".into(),
             command: PaletteCommand::OpenAgentsModal,
         },
         // ── Other ──
         PaletteEntry {
-            label: "Other".into(),
+            label: sec_other.clone(),
             shortcut: String::new(),
-            command: PaletteCommand::SectionHeader("Other".into()),
+            command: PaletteCommand::SectionHeader(sec_other),
         },
         PaletteEntry {
-            label: "Switch Theme".into(),
+            label: tr(TextKey::PaletteSwitchTheme).into_owned(),
             shortcut: "/theme".into(),
             command: PaletteCommand::SlashCommand("/theme ".into()),
         },
         PaletteEntry {
-            label: "Settings".into(),
+            label: tr(TextKey::PaletteSettings).into_owned(),
             shortcut: "F2".into(),
             command: PaletteCommand::OpenSettings,
         },
         PaletteEntry {
-            label: "Keyboard Shortcuts".into(),
+            label: tr(TextKey::PaletteKeyboardShortcuts).into_owned(),
             shortcut: if crate::actions::ctrl_dot_unreliable() {
                 "Ctrl+X".into()
             } else {
@@ -556,17 +564,17 @@ pub(crate) fn default_palette_entries(
             command: PaletteCommand::KeyboardShortcuts,
         },
         PaletteEntry {
-            label: "How-to Guides".into(),
+            label: tr(TextKey::PaletteHowToGuides).into_owned(),
             shortcut: "/docs".into(),
             command: PaletteCommand::HowTo,
         },
         PaletteEntry {
-            label: "Tutorial".into(),
+            label: tr(TextKey::PaletteTutorial).into_owned(),
             shortcut: "/tutorial".into(),
             command: PaletteCommand::SlashCommand("/tutorial".into()),
         },
         PaletteEntry {
-            label: "Quit".into(),
+            label: tr(TextKey::PaletteQuit).into_owned(),
             shortcut: "Ctrl+Q".into(),
             command: PaletteCommand::Quit,
         },
@@ -658,35 +666,36 @@ impl ActiveModal {
             | ActiveModal::RememberNoteReview { .. } => vec![],
         }
     }
-    pub fn message(&self, drain_blocked: bool) -> &str {
+    pub fn message(&self, drain_blocked: bool) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self {
             ActiveModal::EditConfirm { .. } => {
                 if drain_blocked {
-                    "Save and send?"
+                    tr(TextKey::ModalMsgSaveAndSend)
                 } else {
-                    "Save changes?"
+                    tr(TextKey::ModalMsgSaveChanges)
                 }
             }
-            ActiveModal::CommandPalette { .. } => "Commands",
-            ActiveModal::SessionPicker { .. } => "Resume session",
+            ActiveModal::CommandPalette { .. } => tr(TextKey::ModalTitleCommands),
+            ActiveModal::SessionPicker { .. } => tr(TextKey::ModalTitleResumeSession),
             ActiveModal::ArgPicker {
                 command,
                 args_query,
                 ..
             } => match command.as_str() {
-                "model" | "m" if !args_query.is_empty() => "Pick reasoning effort",
-                "model" | "m" => "Pick model",
-                "theme" | "t" => "Pick theme",
-                _ => "Pick option",
+                "model" | "m" if !args_query.is_empty() => tr(TextKey::ModalTitlePickReasoningEffort),
+                "model" | "m" => tr(TextKey::ModalTitlePickModel),
+                "theme" | "t" => tr(TextKey::ModalTitlePickTheme),
+                _ => tr(TextKey::ModalTitlePickOption),
             },
-            ActiveModal::DocPicker { .. } => "How-to Guides",
-            ActiveModal::DocViewer { title, .. } => title.as_str(),
-            ActiveModal::ShortcutsHelp { .. } => "Keyboard Shortcuts",
-            ActiveModal::MemoryBrowser { .. } => "Memory",
-            ActiveModal::Settings { .. } => crate::views::settings_modal::MODAL_TITLE,
-            ActiveModal::ResetSettingsConfirm { .. } => "Reset setting?",
-            ActiveModal::RememberNoteReview { .. } => "Memory Note",
-            ActiveModal::UsageInfo { .. } => "Usage",
+            ActiveModal::DocPicker { .. } => tr(TextKey::ModalTitleHowToGuides),
+            ActiveModal::DocViewer { title, .. } => std::borrow::Cow::Owned(title.clone()),
+            ActiveModal::ShortcutsHelp { .. } => tr(TextKey::ModalTitleKeyboardShortcuts),
+            ActiveModal::MemoryBrowser { .. } => tr(TextKey::ModalTitleMemory),
+            ActiveModal::Settings { .. } => tr(TextKey::ModalTitleSettings),
+            ActiveModal::ResetSettingsConfirm { .. } => tr(TextKey::ModalTitleResetSetting),
+            ActiveModal::RememberNoteReview { .. } => tr(TextKey::ModalTitleMemoryNote),
+            ActiveModal::UsageInfo { .. } => tr(TextKey::ModalTitleUsage),
         }
     }
 }
@@ -1439,18 +1448,20 @@ mod palette_sharing_tests {
     }
     #[test]
     fn palette_tools_section_routes_each_tab_to_itself() {
+        use crate::i18n::{TextKey, tr};
         use crate::views::extensions_modal::ExtensionsTab;
         let entries = default_palette_entries(true, &slash(crate::app::ScreenMode::Fullscreen));
-        for (label, expected) in [
-            ("Hooks", ExtensionsTab::Hooks),
-            ("Plugins", ExtensionsTab::Plugins),
-            ("Marketplace", ExtensionsTab::Marketplace),
-            ("Skills", ExtensionsTab::Skills),
-            ("MCP Servers", ExtensionsTab::McpServers),
+        for (key, expected) in [
+            (TextKey::PaletteHooks, ExtensionsTab::Hooks),
+            (TextKey::PalettePlugins, ExtensionsTab::Plugins),
+            (TextKey::PaletteMarketplace, ExtensionsTab::Marketplace),
+            (TextKey::PaletteSkills, ExtensionsTab::Skills),
+            (TextKey::PaletteMcpServers, ExtensionsTab::McpServers),
         ] {
+            let label = tr(key);
             let entry = entries
                 .iter()
-                .find(|e| e.label == label)
+                .find(|e| e.label == label.as_ref())
                 .unwrap_or_else(|| panic!("Tools entry {label:?} missing from palette"));
             assert!(
                 matches!(
