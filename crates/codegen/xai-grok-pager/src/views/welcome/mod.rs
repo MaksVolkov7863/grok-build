@@ -54,6 +54,7 @@ fn quit_hint_spans(theme: &Theme) -> Vec<Span<'static>> {
     } else {
         "ctrl+q"
     };
+    let quit_label = crate::i18n::tr(crate::i18n::TextKey::Quit);
     vec![
         Span::styled(
             key,
@@ -61,7 +62,7 @@ fn quit_hint_spans(theme: &Theme) -> Vec<Span<'static>> {
                 .fg(theme.accent_user)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::styled("  quit", Style::default().fg(theme.gray)),
+        Span::styled(format!("  {quit_label}"), Style::default().fg(theme.gray)),
     ]
 }
 

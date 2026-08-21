@@ -338,10 +338,11 @@ pub(super) fn render_hero_box(
     // Subtitle line below the version.
     if layout.hero_subtitle.height > 0 {
         let subtitle_style = Style::default().fg(theme.gray);
+        let subtitle_text = crate::i18n::tr(crate::i18n::TextKey::WelcomeHeroSubtitle);
         buf.set_span(
             layout.hero_subtitle.x,
             layout.hero_subtitle.y,
-            &Span::styled(HERO_SUBTITLE, subtitle_style),
+            &Span::styled(subtitle_text, subtitle_style),
             layout.hero_subtitle.width,
         );
     }

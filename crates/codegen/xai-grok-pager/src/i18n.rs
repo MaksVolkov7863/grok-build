@@ -34,15 +34,36 @@ impl Language {
     }
 
     fn from_system_locale() -> Self {
+        // Standard Unix / POSIX locale variables
         let locale = env::var("LC_ALL")
             .ok()
             .or_else(|| env::var("LC_MESSAGES").ok())
             .or_else(|| env::var("LANG").ok());
 
-        match locale.as_deref() {
-            Some(value) if value.to_ascii_lowercase().starts_with("ru") => Self::Russian,
-            _ => Self::English,
+        if let Some(value) = locale.as_deref() {
+            let lower = value.to_ascii_lowercase();
+            if lower.starts_with("ru") || lower.contains("russian") {
+                return Self::Russian;
+            }
         }
+
+        // On Windows, check Windows-specific locale indicators
+        #[cfg(windows)]
+        {
+            if let Ok(user) = env::var("USERNAME") {
+                // If username contains Cyrillic (e.g. "Никита"), it's an unmistakable Russian Windows install
+                if user.chars().any(|c| ('\u{0400}'..='\u{04FF}').contains(&c)) {
+                    return Self::Russian;
+                }
+            }
+            if let Ok(user_profile) = env::var("USERPROFILE") {
+                if user_profile.chars().any(|c| ('\u{0400}'..='\u{04FF}').contains(&c)) {
+                    return Self::Russian;
+                }
+            }
+        }
+
+        Self::English
     }
 }
 
@@ -141,6 +162,11 @@ pub enum TextKey {
     DeletePrompt,
     Cancel,
     Reset,
+    WelcomeHeroSubtitle,
+    TypeAMessage,
+    EnlargeWindowNotice,
+    WindowTooSmall,
+    AcceptConsent,
 }
 
 /// Translate a static UI string using the current application language.
@@ -346,6 +372,29 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::Cancel) => "отмена",
         (Language::English, TextKey::Reset) => "reset",
         (Language::Russian, TextKey::Reset) => "сбросить",
+
+        (Language::English, TextKey::WelcomeHeroSubtitle) => {
+            "Thanks for trying Grok Build, give feedback with /feedback!"
+        }
+        (Language::Russian, TextKey::WelcomeHeroSubtitle) => {
+            "Спасибо, что используете Grok Build! Оставить отзыв: /feedback"
+        }
+
+        (Language::English, TextKey::TypeAMessage) => "Type a message...",
+        (Language::Russian, TextKey::TypeAMessage) => "Введите сообщение...",
+
+        (Language::English, TextKey::EnlargeWindowNotice) => {
+            "Enlarge the window to read this notice"
+        }
+        (Language::Russian, TextKey::EnlargeWindowNotice) => {
+            "Увеличьте окно терминала, чтобы прочитать это уведомление"
+        }
+
+        (Language::English, TextKey::WindowTooSmall) => "Window too small",
+        (Language::Russian, TextKey::WindowTooSmall) => "Окно слишком мало",
+
+        (Language::English, TextKey::AcceptConsent) => "Accept",
+        (Language::Russian, TextKey::AcceptConsent) => "Принять",
     };
 
     Cow::Borrowed(text)

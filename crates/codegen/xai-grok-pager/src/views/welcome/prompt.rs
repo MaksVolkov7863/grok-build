@@ -28,6 +28,7 @@ pub fn render_prompt(
     Option<crate::terminal::overlay::PostFlush>,
 ) {
     let focused = focus == WelcomePromptFocus::Focused;
+    let placeholder = crate::i18n::tr(crate::i18n::TextKey::TypeAMessage);
     let style = PromptStyle {
         focused,
         show_prefix: true,
@@ -36,7 +37,7 @@ pub fn render_prompt(
         chrome: true,
         chrome_pad_left: pad_left,
         chrome_pad_right: pad_right,
-        placeholder_override: Some("Type a message..."),
+        placeholder_override: Some(placeholder.as_ref()),
         ..PromptStyle::default()
     };
 

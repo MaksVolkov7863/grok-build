@@ -62,23 +62,29 @@ pub fn render_consent(
     } else {
         // Title dropped: on a screen this small, why the notice is unreadable matters more.
         let text = if message.width < NARROW_COLS {
-            TOO_SMALL_NARROW
+            crate::i18n::tr(crate::i18n::TextKey::WindowTooSmall)
         } else {
-            TOO_SMALL
+            crate::i18n::tr(crate::i18n::TextKey::EnlargeWindowNotice)
         };
-        paint_centered(message, buf, Style::default().fg(theme.gray), text);
+        paint_centered(message, buf, Style::default().fg(theme.gray), text.as_ref());
         Vec::new()
     };
 
     // Accept is refused while the body is unread, so the row is withheld rather than offered and
     // ignored. Quit stays, or the screen would show no way out at all.
-    let menu_items: &[(&str, &str)] = if legibility.can_accept() {
-        &[("a", notice.accept_label.as_str()), ("q", "Quit")]
+    let quit_label = crate::i18n::tr(crate::i18n::TextKey::QuitLabel);
+    let accept_label = if notice.accept_label == "Accept" {
+        crate::i18n::tr(crate::i18n::TextKey::AcceptConsent)
     } else {
-        &[("q", "Quit")]
+        std::borrow::Cow::Borrowed(notice.accept_label.as_str())
+    };
+    let menu_items: Vec<(&str, &str)> = if legibility.can_accept() {
+        vec![("a", accept_label.as_ref()), ("q", quit_label.as_ref())]
+    } else {
+        vec![("q", quit_label.as_ref())]
     };
     let menu_area = inset_horizontal(layout.menu, prompt::prompt_inset(compact));
-    let menu_rects = render_menu(menu_area, buf, theme, menu_items, selected, None, 0);
+    let menu_rects = render_menu(menu_area, buf, theme, menu_items.as_slice(), selected, None, 0);
 
     // The version row is the only free row, and a pending Ctrl+C matters more than the badge.
     if let Some(pending) = &pending_hint {
