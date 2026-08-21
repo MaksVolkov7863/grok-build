@@ -437,10 +437,12 @@ impl AgentView {
         // unless the user has explicitly navigated focus to the tabs with arrows.
         {
             let state = self.extensions_modal.as_mut().unwrap();
-            let labels: Vec<&str> = crate::views::extensions_modal::ExtensionsTab::ALL
-                .iter()
-                .map(|t| t.label())
-                .collect();
+            let labels_cow: Vec<std::borrow::Cow<'static, str>> =
+                crate::views::extensions_modal::ExtensionsTab::ALL
+                    .iter()
+                    .map(|t| t.label())
+                    .collect();
+            let labels: Vec<&str> = labels_cow.iter().map(|c| c.as_ref()).collect();
             // Build FoldInfo from the focused entry's state. When search is
             // active or the tab bar is focused via Up/Down, fold_info is None
             // so h/l/L/R return Unhandled and fall through (picker handles
@@ -599,10 +601,12 @@ impl AgentView {
         };
 
         // Build the same config as the renderer.
-        let labels: Vec<&str> = crate::views::extensions_modal::ExtensionsTab::ALL
-            .iter()
-            .map(|t| t.label())
-            .collect();
+        let labels_cow: Vec<std::borrow::Cow<'static, str>> =
+            crate::views::extensions_modal::ExtensionsTab::ALL
+                .iter()
+                .map(|t| t.label())
+                .collect();
+        let labels: Vec<&str> = labels_cow.iter().map(|c| c.as_ref()).collect();
         let active_idx = crate::views::extensions_modal::ExtensionsTab::ALL
             .iter()
             .position(|t| *t == state.active_tab)
