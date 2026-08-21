@@ -594,12 +594,13 @@ impl AgentView {
             _ => return InputOutcome::Changed,
         };
 
+        let picker_hints = crate::views::picker::picker_shortcuts();
         let config = PickerConfig {
             title: None,
             show_search_hint: false,
             expandable: false,
             esc_clears_query: false,
-            shortcuts: Some(crate::views::picker::picker_shortcuts()),
+            shortcuts: Some(&picker_hints),
             pending_hint: None,
             non_selectable: &[],
             non_selectable_clickable: &[],

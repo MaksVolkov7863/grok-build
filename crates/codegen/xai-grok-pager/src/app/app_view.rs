@@ -3539,12 +3539,13 @@ fn handle_welcome_input(ev: &Event, ctx: &mut WelcomeInputCtx<'_>) -> InputOutco
                 }),
             _ => false,
         };
+        let picker_hints = crate::views::picker::picker_shortcuts();
         let config = PickerConfig {
             title: Some("Resume session"),
             show_search_hint: true,
             expandable: true,
             esc_clears_query: true,
-            shortcuts: Some(crate::views::picker::picker_shortcuts()),
+            shortcuts: Some(&picker_hints),
             pending_hint: None,
             non_selectable: &non_selectable_flags,
             non_selectable_clickable: &[],
