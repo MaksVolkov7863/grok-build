@@ -34,15 +34,15 @@ pub struct CreditBalance {
     /// on-demand / PAYG UX.
     pub is_unified_billing_user: Option<bool>,
 }
-
 impl CreditBalance {
     /// Label for the percentage allowance, chosen from the period type:
     /// "Weekly limit" / "Monthly limit", falling back to "Usage" when unknown.
-    pub fn usage_label(&self) -> &'static str {
+    pub fn usage_label(&self) -> std::borrow::Cow<'static, str> {
+        use crate::i18n::{TextKey, tr};
         match self.period_type.as_deref() {
-            Some(t) if t.contains("WEEKLY") => "Weekly limit",
-            Some(t) if t.contains("MONTHLY") => "Monthly limit",
-            _ => "Usage",
+            Some(t) if t.contains("WEEKLY") => tr(TextKey::UsageWeeklyLimit),
+            Some(t) if t.contains("MONTHLY") => tr(TextKey::UsageMonthlyLimit),
+            _ => tr(TextKey::UsageGeneral),
         }
     }
 }
@@ -104,6 +104,7 @@ fn fmt_dollars(cents: i64) -> String {
 /// - auto top-up on, no max   → `Auto topup: $N`
 /// - auto top-up on, max set  → `Auto topup: $N` + `Max monthly topup: $M`
 pub fn format_usage_summary(balance: &CreditBalance, autotopup: Option<&AutoTopupInfo>) -> String {
+    use crate::i18n::{TextKey, tr};
     // Floor to match the backend SpendingLimiter's `as u8` truncation
     // (99.994% → 99%, never 100% until truly exhausted).
     let mut lines = vec![format!(
@@ -112,7 +113,8 @@ pub fn format_usage_summary(balance: &CreditBalance, autotopup: Option<&AutoTopu
         balance.usage_pct.floor() as i64
     )];
     if let Some(reset) = &balance.period_end_display {
-        lines.push(format!("Next reset: {reset}"));
+        let prefix = tr(TextKey::NextResetPrefix);
+        lines.push(format!("{prefix}: {reset}"));
     }
 
     // Billing stores credit / top-up amounts as negative cents (accounting
@@ -122,19 +124,24 @@ pub fn format_usage_summary(balance: &CreditBalance, autotopup: Option<&AutoTopu
         .map(i64::abs)
         .filter(|c| *c > 0)
     {
+        let credits_pfx = tr(TextKey::CreditsPrefix);
+        let topup_pfx = tr(TextKey::AutoTopupPrefix);
+        let topup_dis = tr(TextKey::AutoTopupDisabled);
+        let max_pfx = tr(TextKey::MaxMonthlyTopupPrefix);
+
         lines.push(String::new());
-        lines.push(format!("Credits: {}", fmt_dollars(prepaid)));
+        lines.push(format!("{credits_pfx}: {}", fmt_dollars(prepaid)));
         match autotopup {
             Some(at) if at.enabled && at.topup_amount_cents.is_some() => {
                 lines.push(format!(
-                    "Auto topup: {}",
+                    "{topup_pfx}: {}",
                     fmt_dollars(at.topup_amount_cents.unwrap().abs())
                 ));
                 if let Some(max) = at.max_amount_cents {
-                    lines.push(format!("Max monthly topup: {}", fmt_dollars(max.abs())));
+                    lines.push(format!("{max_pfx}: {}", fmt_dollars(max.abs())));
                 }
             }
-            _ => lines.push("Auto topup: disabled".to_string()),
+            _ => lines.push(format!("{topup_pfx}: {topup_dis}")),
         }
     }
 
@@ -144,8 +151,10 @@ pub fn format_usage_summary(balance: &CreditBalance, autotopup: Option<&AutoTopu
     if balance.pay_as_you_go {
         let used = balance.on_demand_used_cents.unwrap_or(0).abs() as f64 / 100.0;
         let cap = balance.on_demand_cap_cents.unwrap_or(0).abs() as f64 / 100.0;
+        let payg_pfx = tr(TextKey::PayAsYouGoPrefix);
+        let used_of = tr(TextKey::PayAsYouGoUsedOf);
         lines.push(String::new());
-        lines.push(format!("Pay-as-you-go: ${used:.2} used of ${cap:.2} limit"));
+        lines.push(format!("{payg_pfx}: ${used:.2} {used_of} ${cap:.2}"));
     }
 
     lines.join("\n")
@@ -179,6 +188,7 @@ pub fn usage_warning_for_session(
     usage_visible: bool,
     gateway_chat: bool,
 ) -> Option<(String, bool)> {
+    use crate::i18n::{TextKey, tr};
     if gateway_chat || !usage_visible {
         return None;
     }
@@ -198,7 +208,8 @@ pub fn usage_warning_for_session(
                 let used = balance.on_demand_used_cents.unwrap_or(0).abs();
                 let remaining = (cap - used).max(0);
                 if remaining <= LOW_BALANCE_CENTS {
-                    let text = format!("Pay-as-you-go limit left: {}", fmt_dollars(remaining));
+                    let pfx = tr(TextKey::PayAsYouGoLimitLeft);
+                    let text = format!("{pfx}: {}", fmt_dollars(remaining));
                     return Some((text, remaining <= PAY_AS_YOU_GO_CRITICAL_CENTS));
                 }
             }
@@ -211,7 +222,11 @@ pub fn usage_warning_for_session(
             // floored summary (99.994% → "1% left", not "0%").
             let remaining = (100 - pct.floor() as i64).max(0);
             let label = balance.usage_label();
-            return Some((format!("{label} left: {remaining}%"), pct > 95.0));
+            let left_suffix = match crate::i18n::language() {
+                crate::i18n::Language::Russian => format!("осталось: {remaining}%"),
+                crate::i18n::Language::English => format!("left: {remaining}%"),
+            };
+            return Some((format!("{label} {left_suffix}"), pct > 95.0));
         }
         return None;
     };
@@ -222,8 +237,9 @@ pub fn usage_warning_for_session(
     }
 
     let credits_warning = || {
+        let pfx = tr(TextKey::CreditsLeftPrefix);
         (
-            format!("Credits left: {}", fmt_dollars(credits_cents)),
+            format!("{pfx}: {}", fmt_dollars(credits_cents)),
             true,
         )
     };
@@ -262,6 +278,7 @@ pub fn credit_bar_line_for_session(
     theme: &Theme,
     gateway_chat: bool,
 ) -> Option<Line<'static>> {
+    use crate::i18n::{TextKey, tr};
     if gateway_chat {
         return None;
     }
@@ -274,7 +291,8 @@ pub fn credit_bar_line_for_session(
         theme.accent_success
     };
 
-    let text = format!("Credits used: {pct:.0}%");
+    let pfx = tr(TextKey::CreditsUsedPrefix);
+    let text = format!("{pfx}: {pct:.0}%");
 
     let style = Style::default().fg(color).bg(theme.bg_base);
     Some(Line::from(Span::styled(text, style)))
@@ -308,6 +326,7 @@ mod tests {
 
     #[test]
     fn summary_no_credits_omits_credits_block() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             period_end_display: Some("June 14, 16:00".into()),
             prepaid_balance_cents: Some(0),
@@ -315,79 +334,103 @@ mod tests {
         };
         // Even with an auto-topup rule present, zero prepaid → no credits block.
         let out = format_usage_summary(&b, Some(&topup(true, Some(2000), Some(10000))));
-        assert_eq!(out, "Usage: 25%\nNext reset: June 14, 16:00");
+        let usage_lbl = tr(TextKey::UsageGeneral);
+        let reset_lbl = tr(TextKey::NextResetPrefix);
+        assert_eq!(out, format!("{usage_lbl}: 25%\n{reset_lbl}: June 14, 16:00"));
     }
 
     #[test]
     fn summary_credits_without_autotopup_shows_disabled() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             prepaid_balance_cents: Some(10000),
             ..bal(25.0)
         };
+        let usage_lbl = tr(TextKey::UsageGeneral);
+        let credits_lbl = tr(TextKey::CreditsPrefix);
+        let topup_lbl = tr(TextKey::AutoTopupPrefix);
+        let disabled_lbl = tr(TextKey::AutoTopupDisabled);
         assert_eq!(
             format_usage_summary(&b, None),
-            "Usage: 25%\n\nCredits: $100\nAuto topup: disabled"
+            format!("{usage_lbl}: 25%\n\n{credits_lbl}: $100\n{topup_lbl}: {disabled_lbl}")
         );
         // A disabled rule renders the same.
         assert_eq!(
             format_usage_summary(&b, Some(&topup(false, Some(2000), Some(10000)))),
-            "Usage: 25%\n\nCredits: $100\nAuto topup: disabled"
+            format!("{usage_lbl}: 25%\n\n{credits_lbl}: $100\n{topup_lbl}: {disabled_lbl}")
         );
     }
 
     #[test]
     fn summary_autotopup_enabled_without_max_omits_max() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             prepaid_balance_cents: Some(10000),
             ..bal(25.0)
         };
+        let usage_lbl = tr(TextKey::UsageGeneral);
+        let credits_lbl = tr(TextKey::CreditsPrefix);
+        let topup_lbl = tr(TextKey::AutoTopupPrefix);
         assert_eq!(
             format_usage_summary(&b, Some(&topup(true, Some(2000), None))),
-            "Usage: 25%\n\nCredits: $100\nAuto topup: $20"
+            format!("{usage_lbl}: 25%\n\n{credits_lbl}: $100\n{topup_lbl}: $20")
         );
     }
-
-    #[test]
-    fn summary_autotopup_enabled_with_max_renders_all() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             period_end_display: Some("June 14, 16:00".into()),
             prepaid_balance_cents: Some(10000),
             ..bal(25.0)
         };
+        let usage_lbl = tr(TextKey::UsageGeneral);
+        let reset_lbl = tr(TextKey::NextResetPrefix);
+        let credits_lbl = tr(TextKey::CreditsPrefix);
+        let topup_lbl = tr(TextKey::AutoTopupPrefix);
+        let max_lbl = tr(TextKey::MaxMonthlyTopupPrefix);
         assert_eq!(
             format_usage_summary(&b, Some(&topup(true, Some(2000), Some(10000)))),
-            "Usage: 25%\nNext reset: June 14, 16:00\n\nCredits: $100\nAuto topup: $20\nMax monthly topup: $100"
+            format!("{usage_lbl}: 25%\n{reset_lbl}: June 14, 16:00\n\n{credits_lbl}: $100\n{topup_lbl}: $20\n{max_lbl}: $100")
         );
     }
 
     #[test]
     fn summary_formats_fractional_dollars() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             prepaid_balance_cents: Some(1250),
             ..bal(25.0)
         };
+        let usage_lbl = tr(TextKey::UsageGeneral);
+        let credits_lbl = tr(TextKey::CreditsPrefix);
+        let topup_lbl = tr(TextKey::AutoTopupPrefix);
         assert_eq!(
             format_usage_summary(&b, Some(&topup(true, Some(550), None))),
-            "Usage: 25%\n\nCredits: $12.50\nAuto topup: $5.50"
+            format!("{usage_lbl}: 25%\n\n{credits_lbl}: $12.50\n{topup_lbl}: $5.50")
         );
     }
 
     #[test]
     fn summary_abs_negative_billing_amounts() {
+        use crate::i18n::{TextKey, tr};
         // Billing returns credit / top-up amounts as negative cents; the
         // summary must render them as positive USD (matching the web).
         let b = CreditBalance {
             prepaid_balance_cents: Some(-500),
             ..bal(100.0)
         };
+        let usage_lbl = tr(TextKey::UsageGeneral);
+        let credits_lbl = tr(TextKey::CreditsPrefix);
+        let topup_lbl = tr(TextKey::AutoTopupPrefix);
+        let max_lbl = tr(TextKey::MaxMonthlyTopupPrefix);
         assert_eq!(
             format_usage_summary(&b, Some(&topup(true, Some(-500), Some(-1000)))),
-            "Usage: 100%\n\nCredits: $5\nAuto topup: $5\nMax monthly topup: $10"
+            format!("{usage_lbl}: 100%\n\n{credits_lbl}: $5\n{topup_lbl}: $5\n{max_lbl}: $10")
         );
     }
 
     #[test]
     fn summary_pay_as_you_go_enabled_renders_used_of_limit() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             pay_as_you_go: true,
             on_demand_used_cents: Some(355),
@@ -396,23 +439,30 @@ mod tests {
             period_end_display: Some("June 30, 16:00".into()),
             ..bal(91.0)
         };
+        let month_lbl = tr(TextKey::UsageMonthlyLimit);
+        let reset_lbl = tr(TextKey::NextResetPrefix);
+        let payg_lbl = tr(TextKey::PayAsYouGoPrefix);
+        let used_of = tr(TextKey::PayAsYouGoUsedOf);
         assert_eq!(
             format_usage_summary(&b, None),
-            "Monthly limit: 91%\nNext reset: June 30, 16:00\n\nPay-as-you-go: $3.55 used of $50.00 limit"
+            format!("{month_lbl}: 91%\n{reset_lbl}: June 30, 16:00\n\n{payg_lbl}: $3.55 {used_of} $50.00 limit")
         );
     }
 
     #[test]
     fn summary_pay_as_you_go_disabled_omits_line() {
+        use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             pay_as_you_go: false,
             period_type: Some("USAGE_PERIOD_TYPE_MONTHLY".into()),
             period_end_display: Some("June 30, 16:00".into()),
             ..bal(91.0)
         };
+        let month_lbl = tr(TextKey::UsageMonthlyLimit);
+        let reset_lbl = tr(TextKey::NextResetPrefix);
         assert_eq!(
             format_usage_summary(&b, None),
-            "Monthly limit: 91%\nNext reset: June 30, 16:00"
+            format!("{month_lbl}: 91%\n{reset_lbl}: June 30, 16:00")
         );
     }
 
@@ -427,36 +477,46 @@ mod tests {
 
     #[test]
     fn usage_label_from_period_type() {
+        use crate::i18n::{TextKey, tr};
         assert_eq!(
             bal_period(0.0, "USAGE_PERIOD_TYPE_WEEKLY").usage_label(),
-            "Weekly limit"
+            tr(TextKey::UsageWeeklyLimit)
         );
         assert_eq!(
             bal_period(0.0, "USAGE_PERIOD_TYPE_MONTHLY").usage_label(),
-            "Monthly limit"
+            tr(TextKey::UsageMonthlyLimit)
         );
         // Unknown / unspecified / absent → falls back to "Usage".
         assert_eq!(
             bal_period(0.0, "USAGE_PERIOD_TYPE_UNSPECIFIED").usage_label(),
-            "Usage"
+            tr(TextKey::UsageGeneral)
         );
-        assert_eq!(bal(0.0).usage_label(), "Usage");
+        assert_eq!(bal(0.0).usage_label(), tr(TextKey::UsageGeneral));
     }
 
     #[test]
     fn summary_uses_period_label() {
+        use crate::i18n::{TextKey, tr};
         let weekly = bal_period(25.0, "USAGE_PERIOD_TYPE_WEEKLY");
-        assert_eq!(format_usage_summary(&weekly, None), "Weekly limit: 25%");
+        let weekly_lbl = tr(TextKey::UsageWeeklyLimit);
+        assert_eq!(format_usage_summary(&weekly, None), format!("{weekly_lbl}: 25%"));
         let monthly = bal_period(25.0, "USAGE_PERIOD_TYPE_MONTHLY");
-        assert_eq!(format_usage_summary(&monthly, None), "Monthly limit: 25%");
+        let monthly_lbl = tr(TextKey::UsageMonthlyLimit);
+        assert_eq!(format_usage_summary(&monthly, None), format!("{monthly_lbl}: 25%"));
     }
 
     #[test]
     fn warning_uses_period_label() {
+        use crate::i18n::{TextKey, tr};
         let weekly = bal_period(92.0, "USAGE_PERIOD_TYPE_WEEKLY");
+        let weekly_lbl = tr(TextKey::UsageWeeklyLimit);
+        let left_suffix = match crate::i18n::language() {
+            crate::i18n::Language::Russian => "осталось: 8%",
+            crate::i18n::Language::English => "left: 8%",
+        };
         assert_eq!(
             usage_warning(&weekly, None, true),
-            Some(("Weekly limit left: 8%".to_string(), false))
+            Some((format!("{weekly_lbl} {left_suffix}"), false))
         );
     }
 

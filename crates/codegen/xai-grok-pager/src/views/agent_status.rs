@@ -169,16 +169,17 @@ fn format_elapsed_compact(ms: u64) -> String {
 /// `pause_label()`, Budget → "Budget", Done → "Done"; an Active goal
 /// uses the shared [`active_phase_label`] suffix.
 fn goal_phase_label(goal: &GoalDisplayState) -> String {
+    use crate::i18n::{TextKey, tr};
     match goal.status {
         GoalDisplayStatus::UserPaused
         | GoalDisplayStatus::BackOffPaused
         | GoalDisplayStatus::NoProgressPaused
         | GoalDisplayStatus::InfraPaused
         | GoalDisplayStatus::Blocked => goal.status.pause_label().into(),
-        GoalDisplayStatus::Failed => "Failed".into(),
-        GoalDisplayStatus::Interrupted => "Interrupted".into(),
-        GoalDisplayStatus::BudgetLimited => "Budget".into(),
-        GoalDisplayStatus::Complete => "Done".into(),
+        GoalDisplayStatus::Failed => tr(TextKey::GoalPhaseFailed).into_owned(),
+        GoalDisplayStatus::Interrupted => tr(TextKey::GoalPhaseInterrupted).into_owned(),
+        GoalDisplayStatus::BudgetLimited => tr(TextKey::GoalPhaseBudget).into_owned(),
+        GoalDisplayStatus::Complete => tr(TextKey::GoalPhaseDone).into_owned(),
         GoalDisplayStatus::Active => active_phase_label(goal),
     }
 }
@@ -188,23 +189,23 @@ fn goal_phase_label(goal: &GoalDisplayState) -> String {
 /// disagree. The transient `verifying_completion` overlay wins, then
 /// `planning`, then the steady-state phase.
 pub fn active_phase_label(goal: &GoalDisplayState) -> String {
+    use crate::i18n::{TextKey, tr};
     if goal.verifying_completion {
         let attempts = classifier_attempts_label(goal);
-        // Omit the "(n/m)" suffix until the first counter arrives so the
-        // chip reads "Verifying" instead of a confusing "Verifying (0/0)".
+        let verifying = tr(TextKey::GoalPhaseVerifying);
         return if attempts.is_empty() {
-            "Verifying".into()
+            verifying.into_owned()
         } else {
-            format!("Verifying ({attempts})")
+            format!("{verifying} ({attempts})")
         };
     }
     if goal.planning {
-        return "Planning".into();
+        return tr(TextKey::GoalPhasePlanning).into_owned();
     }
     match goal.phase {
-        GoalDisplayPhase::Idle => "Idle".into(),
-        GoalDisplayPhase::Planning => "Planning".into(),
-        GoalDisplayPhase::Executing => "Executing".into(),
+        GoalDisplayPhase::Idle => tr(TextKey::GoalPhaseIdle).into_owned(),
+        GoalDisplayPhase::Planning => tr(TextKey::GoalPhasePlanning).into_owned(),
+        GoalDisplayPhase::Executing => tr(TextKey::GoalPhaseExecuting).into_owned(),
     }
 }
 
@@ -238,6 +239,7 @@ pub fn goal_status_line(
     context_used: Option<u64>,
     active_subagent_tokens: u64,
 ) -> Line<'static> {
+    use crate::i18n::{TextKey, tr};
     let label = goal_phase_label(goal);
 
     let tokens_str =
@@ -273,7 +275,7 @@ pub fn goal_status_line(
 
     let is_active = matches!(goal.status, GoalDisplayStatus::Active);
 
-    let chip_name = "Goal";
+    let chip_name = tr(TextKey::GoalChip);
     let goal_text = if is_active {
         let frames = crate::glyphs::dot_spinner_frames();
         let frame = frames[(tick / 4) % frames.len()];
