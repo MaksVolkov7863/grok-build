@@ -36,14 +36,11 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
-      - name: Sccache Setup
-        uses: mozilla-actions/sccache-action@v0.0.9
-
-      - name: Configure Sccache & Flags
+      - name: Configure Cargo Flags
         shell: bash
         run: |
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
+          echo "CARGO_NET_RETRY=10" >> $GITHUB_ENV
 
       - name: Install DotSlash
         uses: actions/cache@v4
