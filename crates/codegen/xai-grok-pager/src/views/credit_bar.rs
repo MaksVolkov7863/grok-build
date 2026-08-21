@@ -376,6 +376,9 @@ mod tests {
             format!("{usage_lbl}: 25%\n\n{credits_lbl}: $100\n{topup_lbl}: $20")
         );
     }
+
+    #[test]
+    fn summary_autotopup_enabled_with_max_renders_all_fields() {
         use crate::i18n::{TextKey, tr};
         let b = CreditBalance {
             period_end_display: Some("June 14, 16:00".into()),
