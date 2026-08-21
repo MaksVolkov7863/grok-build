@@ -350,6 +350,14 @@ pub fn tr(key: TextKey) -> Cow<'static, str> {
     tr_for(language(), key)
 }
 
+/// Translate a static UI string and return &'static str for compile-time or static lifetime requirements.
+pub fn tr_static(key: TextKey) -> &'static str {
+    match tr_for(language(), key) {
+        Cow::Borrowed(s) => s,
+        Cow::Owned(s) => Box::leak(s.into_boxed_str()),
+    }
+}
+
 /// Translate a static UI string for a specific language.
 ///
 /// Kept public so tests and future settings UI can render a preview without

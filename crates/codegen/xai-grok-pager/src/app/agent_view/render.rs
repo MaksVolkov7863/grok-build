@@ -2201,7 +2201,7 @@ impl AgentView {
                         format!("{} ", crate::glyphs::diamond_filled()),
                         Style::default().fg(diamond_color),
                     ),
-                    Span::styled(status_label, text_style),
+                    Span::styled(status_label.clone(), text_style),
                 ];
                 buf.set_line_safe(
                     turn_area.x,

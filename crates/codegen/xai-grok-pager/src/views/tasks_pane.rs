@@ -199,6 +199,15 @@ impl GroupKind {
         }
     }
 
+    fn static_label(self) -> &'static str {
+        match self {
+            GroupKind::Workflows => "Workflows",
+            GroupKind::Subagents => "Subagents",
+            GroupKind::Tasks => "Tasks",
+            GroupKind::Watchers => "Watchers",
+        }
+    }
+
     fn order(self) -> u8 {
         match self {
             GroupKind::Workflows => 0,
@@ -749,7 +758,7 @@ impl ListItem for TaskEntry {
             | TaskEntry::Agent { label, .. }
             | TaskEntry::Scheduled { label, .. }
             | TaskEntry::Workflow { label, .. } => label,
-            TaskEntry::Header { group, .. } => group.label(),
+            TaskEntry::Header { group, .. } => group.static_label(),
         }
     }
 }

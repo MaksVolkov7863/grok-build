@@ -986,10 +986,12 @@ impl AgentView {
         }
 
         // Build the same config as the renderer/key handler.
-        let labels: Vec<&str> = crate::views::extensions_modal::ExtensionsTab::ALL
-            .iter()
-            .map(|t| t.label())
-            .collect();
+        let labels_cow: Vec<std::borrow::Cow<'static, str>> =
+            crate::views::extensions_modal::ExtensionsTab::ALL
+                .iter()
+                .map(|t| t.label())
+                .collect();
+        let labels: Vec<&str> = labels_cow.iter().map(|c| c.as_ref()).collect();
         let active_idx = crate::views::extensions_modal::ExtensionsTab::ALL
             .iter()
             .position(|t| *t == state.active_tab)

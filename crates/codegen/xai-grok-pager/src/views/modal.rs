@@ -814,7 +814,7 @@ pub fn render_modal_overlay(
         .fg(theme.text_primary)
         .bg(bar_bg)
         .add_modifier(Modifier::BOLD);
-    let msg_span = Span::styled(msg, msg_style);
+    let msg_span = Span::styled(msg.clone(), msg_style);
     buf.set_span(bar_area.x, bar_area.y, &msg_span, bar_area.width);
     let mut x = bar_area.x + msg.width() as u16 + 2;
     let btn_bg = theme.bg_dark;
