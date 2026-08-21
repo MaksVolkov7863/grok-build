@@ -755,12 +755,13 @@ impl AgentView {
                     .collect();
                 let entry_count = filtered.len();
 
+                let picker_hints = crate::views::picker::picker_shortcuts();
                 let config = PickerConfig {
                     title: None,
                     show_search_hint: false,
                     expandable: false,
                     esc_clears_query: true,
-                    shortcuts: Some(crate::views::picker::picker_shortcuts()),
+                    shortcuts: Some(&picker_hints),
                     pending_hint: None,
                     non_selectable: &non_sel,
                     non_selectable_clickable: &[],
@@ -1031,12 +1032,13 @@ impl AgentView {
                 // Chat-mode picker lists conversations only: the source
                 // filter and local-disk delete are dead weight there.
                 let chat_mode = self.app_chat_mode;
+                let picker_hints = crate::views::picker::picker_shortcuts();
                 let config = PickerConfig {
                     title: Some("Resume session"),
                     show_search_hint: true,
                     expandable: true,
                     esc_clears_query: false, // Esc returns to palette or closes
-                    shortcuts: Some(crate::views::picker::picker_shortcuts()),
+                    shortcuts: Some(&picker_hints),
                     pending_hint: None,
                     non_selectable: &non_sel,
                     non_selectable_clickable: &[],
@@ -1322,12 +1324,13 @@ impl AgentView {
                     })
                 })
                 .collect();
+            let picker_hints = crate::views::picker::picker_shortcuts();
             let config = PickerConfig {
                 title: Some("How-to Guides"),
                 show_search_hint: false,
                 expandable: false,
                 esc_clears_query: true,
-                shortcuts: Some(crate::views::picker::picker_shortcuts()),
+                shortcuts: Some(&picker_hints),
                 pending_hint: None,
                 non_selectable: &non_sel,
                 non_selectable_clickable: &[],
