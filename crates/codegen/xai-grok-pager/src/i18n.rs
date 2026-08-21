@@ -327,6 +327,22 @@ pub enum TextKey {
     ExtTabMarketplace,
     ExtTabSkills,
     ExtTabMcpServers,
+
+    // Plan Approval
+    PlanApprovalWaiting,
+    PlanApprovalNoPlan,
+
+    // Permissions
+    PermAllowOnce,
+    PermAllowAlways,
+    PermRejectOnce,
+    PermRejectAlways,
+    PermFollowupPlaceholder,
+
+    // Questions & Surveys
+    QuestionOtherPlaceholder,
+    QuestionSelectOption,
+    QuestionSelectOptions,
 }
 
 /// Translate a static UI string using the current application language.
@@ -858,6 +874,36 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::ExtTabSkills) => "Навыки",
         (Language::English, TextKey::ExtTabMcpServers) => "MCP Servers",
         (Language::Russian, TextKey::ExtTabMcpServers) => "Серверы MCP",
+
+        // Plan Approval
+        (Language::English, TextKey::PlanApprovalWaiting) => "Waiting on plan approval",
+        (Language::Russian, TextKey::PlanApprovalWaiting) => "Ожидание утверждения плана",
+        (Language::English, TextKey::PlanApprovalNoPlan) => {
+            "No plan written — approve or request changes"
+        }
+        (Language::Russian, TextKey::PlanApprovalNoPlan) => {
+            "План не написан — утвердите или запросите изменения"
+        }
+
+        // Permissions
+        (Language::English, TextKey::PermAllowOnce) => "Allow once",
+        (Language::Russian, TextKey::PermAllowOnce) => "Разрешить один раз",
+        (Language::English, TextKey::PermAllowAlways) => "Always allow",
+        (Language::Russian, TextKey::PermAllowAlways) => "Разрешать всегда",
+        (Language::English, TextKey::PermRejectOnce) => "Reject once",
+        (Language::Russian, TextKey::PermRejectOnce) => "Отклонить один раз",
+        (Language::English, TextKey::PermRejectAlways) => "Always reject",
+        (Language::Russian, TextKey::PermRejectAlways) => "Всегда отклонять",
+        (Language::English, TextKey::PermFollowupPlaceholder) => "Type message for agent...",
+        (Language::Russian, TextKey::PermFollowupPlaceholder) => "Введите сообщение для агента...",
+
+        // Questions & Surveys
+        (Language::English, TextKey::QuestionOtherPlaceholder) => "Type custom answer...",
+        (Language::Russian, TextKey::QuestionOtherPlaceholder) => "Введите свой вариант ответа...",
+        (Language::English, TextKey::QuestionSelectOption) => "Select option",
+        (Language::Russian, TextKey::QuestionSelectOption) => "Выберите вариант",
+        (Language::English, TextKey::QuestionSelectOptions) => "Select options",
+        (Language::Russian, TextKey::QuestionSelectOptions) => "Выберите варианты",
     };
 
     Cow::Borrowed(text)

@@ -26,11 +26,12 @@ The agent exited plan mode without writing a plan.
 ///
 /// Empty plans use an active decision prompt instead of "Waiting…", so the
 /// UI doesn't look stuck when there is no preview body to open.
-pub fn plan_approval_status_label(has_plan: bool) -> &'static str {
+pub fn plan_approval_status_label(has_plan: bool) -> std::borrow::Cow<'static, str> {
+    use crate::i18n::{TextKey, tr};
     if has_plan {
-        "Waiting on plan approval"
+        tr(TextKey::PlanApprovalWaiting)
     } else {
-        "No plan written — approve or request changes"
+        tr(TextKey::PlanApprovalNoPlan)
     }
 }
 
