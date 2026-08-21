@@ -793,7 +793,7 @@ pub fn prompt_focus_hint() -> HintItem {
     use crossterm::event::{KeyCode, KeyModifiers};
     HintItem {
         keys: vec![KeyShortcut::new(KeyCode::Char(' '), KeyModifiers::NONE)],
-        label: "prompt".into(),
+        label: crate::i18n::tr(crate::i18n::TextKey::HintPrompt),
         custom_display: Some("Space"),
         description: None,
         pinned: false,
@@ -842,21 +842,26 @@ pub fn build_hints(
     shift_enter_unavailable: bool,
     scrollback_search: Option<&ScrollbackSearchState>,
 ) -> Vec<HintItem> {
+    use crate::i18n::{TextKey, tr};
     let mut hints = match active_pane {
         ActivePane::Todo => {
             let mut hints = Vec::new();
             hints.push(HintItem::new(
                 crate::key!('h'),
-                if show_done { "hide done" } else { "show done" },
+                if show_done {
+                    tr(TextKey::HintHideDone)
+                } else {
+                    tr(TextKey::HintShowDone)
+                },
             ));
             hints
         }
         ActivePane::Queue => {
             let mut hints = vec![
-                HintItem::new(crate::key!('x'), "delete row"),
-                HintItem::new(crate::key!('e'), "edit"),
-                HintItem::paired(crate::key!('J'), crate::key!('K'), "reorder"),
-                HintItem::new(crate::key!('y'), "copy"),
+                HintItem::new(crate::key!('x'), tr(TextKey::HintDeleteRow)),
+                HintItem::new(crate::key!('e'), tr(TextKey::HintEdit)),
+                HintItem::paired(crate::key!('J'), crate::key!('K'), tr(TextKey::HintReorder)),
+                HintItem::new(crate::key!('y'), tr(TextKey::HintCopy)),
             ];
             if is_turn_running && let Some(def) = registry.find(ActionId::InterjectPrompt) {
                 hints.push(def.hint());
@@ -866,9 +871,9 @@ pub fn build_hints(
         ActivePane::Prompt if is_editing_queued => {
             let mut hints = Vec::new();
             if prompt.can_send() {
-                hints.push(HintItem::new(crate::key!(Enter), "save"));
+                hints.push(HintItem::new(crate::key!(Enter), tr(TextKey::Save)));
             }
-            hints.push(HintItem::new(crate::key!(Esc), "cancel"));
+            hints.push(HintItem::new(crate::key!(Esc), tr(TextKey::Cancel)));
             hints
         }
         ActivePane::Prompt if prompt.history_search.is_active() => {
@@ -878,15 +883,15 @@ pub fn build_hints(
                 HintItem::paired(
                     KeyShortcut::key(KeyCode::Up),
                     KeyShortcut::key(KeyCode::Down),
-                    "nav",
+                    tr(TextKey::HintNav),
                 ),
                 HintItem::paired(
                     KeyShortcut::key(KeyCode::PageUp),
                     KeyShortcut::key(KeyCode::PageDown),
-                    "page",
+                    tr(TextKey::HintPage),
                 ),
-                HintItem::new(KeyShortcut::key(KeyCode::Enter), "select"),
-                HintItem::new(KeyShortcut::key(KeyCode::Esc), "cancel"),
+                HintItem::new(KeyShortcut::key(KeyCode::Enter), tr(TextKey::HintSelect)),
+                HintItem::new(KeyShortcut::key(KeyCode::Esc), tr(TextKey::Cancel)),
             ]
         }
         ActivePane::Prompt => {
@@ -896,31 +901,39 @@ pub fn build_hints(
             } else {
                 crate::key!(Enter, SHIFT)
             };
-            let submit_label = if is_turn_running { "queue" } else { "send" };
+            let submit_label = if is_turn_running {
+                tr(TextKey::HintQueue)
+            } else {
+                tr(TextKey::HintSend)
+            };
             if let Some(key) = registry.key_for(ActionId::SendPrompt) {
                 if prompt.paste_element_at_cursor().is_some() {
-                    hints.push(HintItem::new(key, "expand"));
+                    hints.push(HintItem::new(key, tr(TextKey::HintExpand)));
                 } else if multiline_mode && prompt.can_send() {
                     hints.push(HintItem::new(newline_key, submit_label));
                 } else if prompt.can_send() {
                     hints.push(HintItem::new(key, submit_label));
                 } else if is_turn_running && has_queued_follow_up {
-                    hints.push(HintItem::new(key, "send now"));
+                    hints.push(HintItem::new(key, tr(TextKey::HintSendNow)));
                 }
             }
             if shift_enter_unavailable && !multiline_mode && prompt.can_send() {
-                hints.push(HintItem::new(crate::key!(Enter, ALT), "newline"));
+                hints.push(HintItem::new(crate::key!(Enter, ALT), tr(TextKey::HintNewline)));
             }
             if prompt.file_ref_near_cursor() {
-                hints.push(HintItem::new(crate::key!(':'), "lines"));
+                hints.push(HintItem::new(crate::key!(':'), tr(TextKey::HintLines)));
             }
             if prompt.prompt_suggestion_visible() {
                 hints.push(
-                    HintItem::paired(crate::key!(Tab), crate::key!(Right), "accept suggestion")
-                        .pinned(),
+                    HintItem::paired(
+                        crate::key!(Tab),
+                        crate::key!(Right),
+                        tr(TextKey::HintAcceptSuggestion),
+                    )
+                    .pinned(),
                 );
             }
-            hints.push(HintItem::new(crate::key!(BackTab), "mode"));
+            hints.push(HintItem::new(crate::key!(BackTab), tr(TextKey::HintMode)));
             for def in registry.hints(&[When::PromptFocused, When::AgentScreen, When::Always]) {
                 if def.id == ActionId::SendPrompt
                     || def.id == ActionId::CommandPalette
@@ -938,17 +951,21 @@ pub fn build_hints(
         ActivePane::Tasks => {
             let mut hints = Vec::new();
             if selected_supports_fullscreen {
-                hints.push(HintItem::new(crate::key!(Enter), "view"));
+                hints.push(HintItem::new(crate::key!(Enter), tr(TextKey::HintView)));
             }
             if selected_supports_copy {
-                hints.push(HintItem::new(crate::key!('y'), "copy output"));
+                hints.push(HintItem::new(crate::key!('y'), tr(TextKey::HintCopyOutput)));
             }
             if selected_can_kill {
-                hints.push(HintItem::new(crate::key!('x'), "kill"));
+                hints.push(HintItem::new(crate::key!('x'), tr(TextKey::HintKill)));
             }
             hints.push(HintItem::new(
                 crate::key!('h'),
-                if show_done { "hide done" } else { "show done" },
+                if show_done {
+                    tr(TextKey::HintHideDone)
+                } else {
+                    tr(TextKey::HintShowDone)
+                },
             ));
             hints
         }
@@ -957,12 +974,12 @@ pub fn build_hints(
             let mut hints = Vec::new();
             if vim_mode {
                 if scrollback_search.is_some_and(|s| s.is_composing()) {
-                    hints.push(HintItem::new(crate::key!(Enter), "go"));
+                    hints.push(HintItem::new(crate::key!(Enter), tr(TextKey::HintGo)));
                 } else {
                     hints.push(HintItem::paired(
                         crate::key!('n'),
                         crate::key!('N'),
-                        "next/prev",
+                        tr(TextKey::HintNextPrev),
                     ));
                 }
             } else {
@@ -971,10 +988,10 @@ pub fn build_hints(
                 hints.push(HintItem::paired(
                     KeyShortcut::key(KeyCode::Down),
                     KeyShortcut::key(KeyCode::Up),
-                    "next/prev",
+                    tr(TextKey::HintNextPrev),
                 ));
             }
-            hints.push(HintItem::new(crate::key!(Esc), "cancel"));
+            hints.push(HintItem::new(crate::key!(Esc), tr(TextKey::Cancel)));
             hints
         }
         ActivePane::Scrollback => {
@@ -998,7 +1015,7 @@ pub fn build_hints(
             }
             if selected_is_credit_limit {
                 if let Some(key) = registry.key_for(ActionId::OpenBlockViewer) {
-                    hints.push(HintItem::new(key, "open"));
+                    hints.push(HintItem::new(key, tr(TextKey::HintOpen)));
                 }
                 offer_focus_hint(&mut hints);
             }
@@ -1007,7 +1024,7 @@ pub fn build_hints(
                     && selected_supports_copy
                     && let Some(key) = registry.key_for(ActionId::CopyBlockContent)
                 {
-                    hints.push(HintItem::new(key, "copy"));
+                    hints.push(HintItem::new(key, tr(TextKey::HintCopy)));
                 }
                 offer_focus_hint(&mut hints);
             }
@@ -1018,11 +1035,18 @@ pub fn build_hints(
                         .key_for_mode(ActionId::ToggleFold, vim_mode)
                         .or_else(|| registry.key_for_mode(ActionId::Expand, vim_mode));
                     if let Some(key) = key {
-                        hints.push(HintItem::new(key, "expand"));
+                        hints.push(HintItem::new(key, tr(TextKey::HintExpand)));
                     }
                 }
                 if let Some(key) = registry.key_for(ActionId::ExpandAllThinking) {
-                    hints.push(HintItem::new(key, thinking_label));
+                    let dynamic_thinking = if thinking_label == "expand thinking" {
+                        tr(TextKey::HintExpandThinking)
+                    } else if thinking_label == "collapse thinking" {
+                        tr(TextKey::HintCollapseThinking)
+                    } else {
+                        std::borrow::Cow::Borrowed(thinking_label)
+                    };
+                    hints.push(HintItem::new(key, dynamic_thinking));
                 }
                 if !user_collapsed {
                     offer_focus_hint(&mut hints);
@@ -1032,7 +1056,12 @@ pub fn build_hints(
                 selected_is_user_prompt && fold_label == Some("expand");
             if let Some(label) = group_header_label {
                 if let Some(key) = registry.key_for(ActionId::OpenBlockViewer) {
-                    hints.push(HintItem::new(key, label));
+                    let localized_label = match label {
+                        "expand" => tr(TextKey::HintExpand),
+                        "collapse" => tr(TextKey::HintCollapse),
+                        _ => std::borrow::Cow::Borrowed(label),
+                    };
+                    hints.push(HintItem::new(key, localized_label));
                 }
             } else if !user_collapsed_already_pushed && let Some(label) = fold_label {
                 let directional = if label == "expand" {
@@ -1044,14 +1073,20 @@ pub fn build_hints(
                     .key_for_mode(ActionId::ToggleFold, vim_mode)
                     .or_else(|| registry.key_for_mode(directional, vim_mode));
                 if let Some(key) = key {
-                    hints.push(HintItem::new(key, label));
+                    let localized_label = match label {
+                        "expand" => tr(TextKey::HintExpand),
+                        "collapse" => tr(TextKey::HintCollapse),
+                        "fold" => tr(TextKey::HintFold),
+                        _ => std::borrow::Cow::Borrowed(label),
+                    };
+                    hints.push(HintItem::new(key, localized_label));
                 }
             }
             if group_header_label.is_none()
                 && selected_supports_fullscreen
                 && let Some(key) = registry.key_for(ActionId::OpenBlockViewer)
             {
-                hints.push(HintItem::new(key, "open"));
+                hints.push(HintItem::new(key, tr(TextKey::HintOpen)));
             }
             if vim_mode
                 && let (Some(j), Some(k)) = (
@@ -1059,7 +1094,7 @@ pub fn build_hints(
                     registry.key_for(ActionId::SelectPrev),
                 )
             {
-                hints.push(HintItem::paired(j, k, "nav").pinned());
+                hints.push(HintItem::paired(j, k, tr(TextKey::HintNav)).pinned());
             }
             if vim_mode
                 && let (Some(h), Some(l)) = (
@@ -1067,12 +1102,19 @@ pub fn build_hints(
                     registry.key_for(ActionId::NextTurn),
                 )
             {
-                hints.push(HintItem::paired(l, h, "turn").pinned());
+                hints.push(HintItem::paired(l, h, tr(TextKey::HintTurn)).pinned());
             }
             if !selected_is_user_prompt
                 && let Some(key) = registry.key_for(ActionId::ExpandAllThinking)
             {
-                hints.push(HintItem::new(key, thinking_label));
+                let dynamic_thinking = if thinking_label == "expand thinking" {
+                    tr(TextKey::HintExpandThinking)
+                } else if thinking_label == "collapse thinking" {
+                    tr(TextKey::HintCollapseThinking)
+                } else {
+                    std::borrow::Cow::Borrowed(thinking_label)
+                };
+                hints.push(HintItem::new(key, dynamic_thinking));
             }
             if vim_mode
                 && let (Some(g), Some(bg)) = (
@@ -1080,14 +1122,14 @@ pub fn build_hints(
                     registry.key_for(ActionId::GotoBottom),
                 )
             {
-                hints.push(HintItem::paired(g, bg, "top/btm"));
+                hints.push(HintItem::paired(g, bg, tr(TextKey::HintTopBtm)));
             }
             if vim_mode
                 && !selected_is_agent_message
                 && selected_supports_copy
                 && let Some(key) = registry.key_for(ActionId::CopyBlockContent)
             {
-                hints.push(HintItem::new(key, "copy"));
+                hints.push(HintItem::new(key, tr(TextKey::HintCopy)));
             }
             if vim_mode
                 && let Some(label) = selected_meta_label
@@ -1096,10 +1138,10 @@ pub fn build_hints(
                 hints.push(HintItem::new(key, label));
             }
             if selected_can_kill {
-                hints.push(HintItem::new(crate::key!('x'), "kill"));
+                hints.push(HintItem::new(crate::key!('x'), tr(TextKey::HintKill)));
             }
             if is_subagent_view {
-                hints.push(HintItem::paired(crate::key!('q'), crate::key!(Esc), "back"));
+                hints.push(HintItem::paired(crate::key!('q'), crate::key!(Esc), tr(TextKey::HintBack)));
             }
             hints
         }
@@ -1122,7 +1164,7 @@ pub fn build_hints(
         && !is_subagent_view
         && let Some(key) = registry.key_for(ActionId::SendToBackground)
     {
-        hints.push(HintItem::new(key, "send to bg"));
+        hints.push(HintItem::new(key, tr(TextKey::SendToBg)));
     }
     hints
 }
@@ -1328,9 +1370,10 @@ mod tests {
             false,
             None,
         );
+        let demote_label = crate::i18n::tr(crate::i18n::TextKey::SendToBg);
         let hint = hints
             .iter()
-            .find(|hint| hint.label == "send to bg")
+            .find(|hint| hint.label == demote_label)
             .expect("running Execute should advertise demotion");
         assert_eq!(hint.keys, vec![crate::key!('b', CONTROL)]);
     }
@@ -1364,12 +1407,14 @@ mod tests {
             false,
             None,
         );
+        let open_label = crate::i18n::tr(crate::i18n::TextKey::HintOpen);
+        let expand_label = crate::i18n::tr(crate::i18n::TextKey::HintExpand);
         let labels: Vec<&str> = hints.iter().map(|h| h.label.as_ref()).collect();
         assert!(
-            !labels.contains(&"open"),
+            !labels.contains(&open_label.as_ref()),
             "no Enter:open hint on a group header, got {labels:?}"
         );
-        let expand_hints: Vec<&HintItem> = hints.iter().filter(|h| h.label == "expand").collect();
+        let expand_hints: Vec<&HintItem> = hints.iter().filter(|h| h.label == expand_label).collect();
         assert_eq!(
             expand_hints.len(),
             1,
@@ -1385,7 +1430,7 @@ mod tests {
         );
         assert_eq!(
             labels.first(),
-            Some(&"expand"),
+            Some(&expand_label.as_ref()),
             "the Enter toggle takes the first compact slot, got {labels:?}"
         );
     }
@@ -1393,38 +1438,49 @@ mod tests {
     fn scrollback_user_prompt_collapsed_hoists_expand_then_thinking() {
         let registry = ActionRegistry::defaults();
         let hints = scrollback_hints(&registry, Some("expand"), false, false, true, false);
-        assert_eq!(first_two_labels(&hints), vec!["expand", "expand thinking"]);
+        let expand_label = crate::i18n::tr(crate::i18n::TextKey::HintExpand);
+        let thinking_label = crate::i18n::tr(crate::i18n::TextKey::HintExpandThinking);
+        assert_eq!(first_two_labels(&hints), vec![expand_label.as_ref(), thinking_label.as_ref()]);
     }
     #[test]
     fn scrollback_user_prompt_expanded_hoists_thinking_then_space() {
         let registry = ActionRegistry::defaults();
         let hints = scrollback_hints(&registry, Some("collapse"), false, false, true, false);
-        assert_eq!(first_two_labels(&hints), vec!["expand thinking", "prompt"]);
+        let thinking_label = crate::i18n::tr(crate::i18n::TextKey::HintExpandThinking);
+        let prompt_label = crate::i18n::tr(crate::i18n::TextKey::HintPrompt);
+        assert_eq!(first_two_labels(&hints), vec![thinking_label.as_ref(), prompt_label.as_ref()]);
     }
     #[test]
     fn scrollback_agent_message_hoists_copy_then_space() {
         let registry = ActionRegistry::defaults();
         let hints = scrollback_hints(&registry, None, true, false, false, true);
-        assert_eq!(first_two_labels(&hints), vec!["copy", "prompt"]);
+        let copy_label = crate::i18n::tr(crate::i18n::TextKey::HintCopy);
+        let prompt_label = crate::i18n::tr(crate::i18n::TextKey::HintPrompt);
+        assert_eq!(first_two_labels(&hints), vec![copy_label.as_ref(), prompt_label.as_ref()]);
     }
     #[test]
     fn scrollback_agent_message_no_duplicate_y_copy_in_full_list() {
         let registry = ActionRegistry::defaults();
         let hints = scrollback_hints(&registry, None, true, false, false, true);
-        let copy_count = hints.iter().filter(|h| h.label == "copy").count();
+        let copy_label = crate::i18n::tr(crate::i18n::TextKey::HintCopy);
+        let copy_count = hints.iter().filter(|h| h.label == copy_label).count();
         assert_eq!(copy_count, 1, "copy should appear exactly once");
     }
     #[test]
     fn scrollback_default_block_shows_prompt_first() {
         let registry = ActionRegistry::defaults();
         let hints = scrollback_hints(&registry, None, false, false, false, false);
-        assert_eq!(first_two_labels(&hints), vec!["prompt", "nav"]);
+        let prompt_label = crate::i18n::tr(crate::i18n::TextKey::HintPrompt);
+        let nav_label = crate::i18n::tr(crate::i18n::TextKey::HintNav);
+        assert_eq!(first_two_labels(&hints), vec![prompt_label.as_ref(), nav_label.as_ref()]);
     }
     #[test]
     fn scrollback_foldable_non_user_block_hoists_fold_then_open() {
         let registry = ActionRegistry::defaults();
         let hints = scrollback_hints(&registry, Some("fold"), false, true, false, false);
-        assert_eq!(first_two_labels(&hints), vec!["fold", "open"]);
+        let fold_label = crate::i18n::tr(crate::i18n::TextKey::HintFold);
+        let open_label = crate::i18n::tr(crate::i18n::TextKey::HintOpen);
+        assert_eq!(first_two_labels(&hints), vec![fold_label.as_ref(), open_label.as_ref()]);
     }
     #[test]
     fn scrollback_vim_mode_on_shows_nav_and_turn_hints() {
@@ -1432,16 +1488,19 @@ mod tests {
         let hints =
             scrollback_hints_with_vim_mode(&registry, None, false, false, false, false, true);
         let labels: Vec<&str> = hints.iter().map(|h| h.label.as_ref()).collect();
+        let nav_label = crate::i18n::tr(crate::i18n::TextKey::HintNav);
+        let turn_label = crate::i18n::tr(crate::i18n::TextKey::HintTurn);
+        let topbtm_label = crate::i18n::tr(crate::i18n::TextKey::HintTopBtm);
         assert!(
-            labels.contains(&"nav"),
+            labels.contains(&nav_label.as_ref()),
             "vim mode should show j/k nav hint; got {labels:?}"
         );
         assert!(
-            labels.contains(&"turn"),
+            labels.contains(&turn_label.as_ref()),
             "vim mode should show Shift+l/h turn hint; got {labels:?}"
         );
         assert!(
-            labels.contains(&"top/btm"),
+            labels.contains(&topbtm_label.as_ref()),
             "vim mode should show g/G top/btm hint; got {labels:?}"
         );
     }
@@ -1451,16 +1510,19 @@ mod tests {
         let hints =
             scrollback_hints_with_vim_mode(&registry, None, false, false, false, false, false);
         let labels: Vec<&str> = hints.iter().map(|h| h.label.as_ref()).collect();
+        let nav_label = crate::i18n::tr(crate::i18n::TextKey::HintNav);
+        let turn_label = crate::i18n::tr(crate::i18n::TextKey::HintTurn);
+        let topbtm_label = crate::i18n::tr(crate::i18n::TextKey::HintTopBtm);
         assert!(
-            !labels.contains(&"nav"),
+            !labels.contains(&nav_label.as_ref()),
             "vim-off must hide j/k nav hint; got {labels:?}"
         );
         assert!(
-            !labels.contains(&"turn"),
+            !labels.contains(&turn_label.as_ref()),
             "vim-off must hide Shift+l/h turn hint; got {labels:?}"
         );
         assert!(
-            !labels.contains(&"top/btm"),
+            !labels.contains(&topbtm_label.as_ref()),
             "vim-off must hide g/G top/btm hint; got {labels:?}"
         );
     }
