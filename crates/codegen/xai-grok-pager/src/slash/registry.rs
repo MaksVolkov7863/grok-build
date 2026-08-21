@@ -75,12 +75,13 @@ impl CommandTrigger {
         source: CommandSource,
     ) -> Self {
         let key = alias.unwrap_or(canonical);
+        let description = crate::i18n::slash_command_description(canonical, command.description()).into_owned();
         Self {
             canonical: canonical.to_string(),
             alias: alias.map(|s| s.to_string()),
             display: format!("/{key}"),
             match_text: key.to_string(),
-            description: command.description().to_string(),
+            description,
             usage: command.usage().to_string(),
             takes_args: command.takes_args(),
             args_required: command.args_required(),

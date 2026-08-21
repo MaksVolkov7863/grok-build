@@ -2167,15 +2167,20 @@ fn render_welcome_done(
                 height: tip_centered.height,
             };
             let key_name = "ctrl+u";
+            let (prefix_str, msg_str) = if crate::i18n::language() == crate::i18n::Language::Russian {
+                ("Обновление: ", format!("доступна версия v{ver} \u{2014} нажмите {key_name} для перезапуска"))
+            } else {
+                ("Update: ", format!("v{ver} available \u{2014} press {key_name} to restart"))
+            };
             let line = Line::from(vec![
                 Span::styled(
-                    "Update: ",
+                    prefix_str,
                     Style::default()
                         .fg(theme.accent_user)
                         .add_modifier(Modifier::BOLD),
                 ),
                 Span::styled(
-                    format!("v{ver} available \u{2014} press {key_name} to restart"),
+                    msg_str,
                     Style::default().fg(theme.accent_user),
                 ),
             ]);
@@ -2206,7 +2211,14 @@ fn render_welcome_done(
                 height: tip_centered.height,
             };
             let mins = hint.age.as_secs() / 60;
-            let when = if mins == 0 {
+            let is_ru = crate::i18n::language() == crate::i18n::Language::Russian;
+            let when = if is_ru {
+                if mins == 0 {
+                    "только что".to_string()
+                } else {
+                    format!("{mins} мин. назад")
+                }
+            } else if mins == 0 {
                 "moments ago".to_string()
             } else {
                 format!("{mins}m ago")
@@ -2214,12 +2226,21 @@ fn render_welcome_done(
             let accent = Style::default().fg(theme.accent_user);
             let accent_bold = accent.add_modifier(Modifier::BOLD);
             let tool = crate::app::foreign_tool_display_label(hint.tool);
-            let line = Line::from(vec![
-                Span::styled("Coming from ", accent),
-                Span::styled(tool, accent_bold),
-                Span::styled(format!("? Resume your session from {when} using "), accent),
-                Span::styled("ctrl+u", accent_bold),
-            ]);
+            let line = if is_ru {
+                Line::from(vec![
+                    Span::styled("Переход из ", accent),
+                    Span::styled(tool, accent_bold),
+                    Span::styled(format!("? Возобновите сессию от {when} с помощью "), accent),
+                    Span::styled("ctrl+u", accent_bold),
+                ])
+            } else {
+                Line::from(vec![
+                    Span::styled("Coming from ", accent),
+                    Span::styled(tool, accent_bold),
+                    Span::styled(format!("? Resume your session from {when} using "), accent),
+                    Span::styled("ctrl+u", accent_bold),
+                ])
+            };
             Paragraph::new(line)
                 .style(Style::default().bg(theme.bg_base))
                 .render(tip_inset, buf);

@@ -746,7 +746,7 @@ pub(crate) fn build_session_entry_data(
                 }
                 let fmt_time = |dt: chrono::DateTime<chrono::Utc>| {
                     dt.with_timezone(&chrono::Local)
-                        .format("%b %d, %l:%M%P")
+                        .format("%b %d, %H:%M")
                         .to_string()
                 };
                 field_data.push(("Created".into(), fmt_time(entry.created_at)));

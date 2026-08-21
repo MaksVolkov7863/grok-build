@@ -78,9 +78,10 @@ impl SuggestionRow {
     }
 
     fn from_arg(item: &ArgItem) -> Self {
+        let description = crate::i18n::slash_arg_description(&item.display, &item.description);
         Self {
             display: item.display.clone(),
-            description: item.description.clone(),
+            description,
             insert_text: item.insert_text.clone(),
             indices: Vec::new(),
             tag: None,

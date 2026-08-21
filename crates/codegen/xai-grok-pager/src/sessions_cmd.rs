@@ -126,7 +126,7 @@ pub async fn run(args: SessionsArgs, agent_config: &AgentConfig) -> Result<()> {
                 let time = chrono::DateTime::from_timestamp(hit.updated_at_unix, 0)
                     .map(|dt| {
                         dt.with_timezone(&chrono::Local)
-                            .format("%b %d, %l:%M%P")
+                            .format("%b %d, %H:%M")
                             .to_string()
                     })
                     .unwrap_or_default();
@@ -157,7 +157,7 @@ pub async fn run(args: SessionsArgs, agent_config: &AgentConfig) -> Result<()> {
                 let time = chrono::DateTime::parse_from_rfc3339(&r.updated_at)
                     .map(|dt| {
                         dt.with_timezone(&chrono::Local)
-                            .format("%b %d, %l:%M%P")
+                            .format("%b %d, %H:%M")
                             .to_string()
                     })
                     .unwrap_or_default();

@@ -166,8 +166,20 @@ impl CommandProvenance {
     /// bare name.
     pub fn badge(&self) -> std::borrow::Cow<'static, str> {
         match self {
-            Self::Builtin | Self::Shell => std::borrow::Cow::Borrowed("built-in"),
-            Self::Skill { source } => std::borrow::Cow::Owned(format!("skill · {source}")),
+            Self::Builtin | Self::Shell => {
+                if crate::i18n::language() == crate::i18n::Language::Russian {
+                    std::borrow::Cow::Borrowed("встроенная")
+                } else {
+                    std::borrow::Cow::Borrowed("built-in")
+                }
+            }
+            Self::Skill { source } => {
+                if crate::i18n::language() == crate::i18n::Language::Russian {
+                    std::borrow::Cow::Owned(format!("навык · {source}"))
+                } else {
+                    std::borrow::Cow::Owned(format!("skill · {source}"))
+                }
+            }
         }
     }
 }

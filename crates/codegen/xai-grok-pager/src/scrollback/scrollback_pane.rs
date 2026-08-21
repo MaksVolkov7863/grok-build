@@ -946,7 +946,7 @@ impl ScrollbackPane {
             let ts_str = if ts_hovered {
                 ts.format("  %H:%M:%S | %b %d").to_string()
             } else {
-                ts.format("  %-I:%M %p").to_string()
+                ts.format("  %H:%M").to_string()
             };
             let ts_width = ts_str.len() as u16;
             if content_area.width > ts_width + 1

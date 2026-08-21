@@ -209,11 +209,18 @@ impl ExecuteToolCallBlock {
                 } else {
                     theme.primary().add_modifier(Modifier::BOLD)
                 };
-                let mut spans = vec![Span::styled("Run ".to_string(), label_style)];
-                let mut hang = UnicodeWidthStr::width("Run ");
+                let run_str = crate::i18n::tr(crate::i18n::TextKey::RunPrefix);
+                let run_hang = UnicodeWidthStr::width(run_str.as_ref());
+                let mut spans = vec![Span::styled(run_str.into_owned(), label_style)];
+                let mut hang = run_hang;
                 if self.bash_mode {
-                    spans.push(Span::styled("(user) ".to_string(), theme.muted()));
-                    hang += UnicodeWidthStr::width("(user) ");
+                    let user_str = if crate::i18n::language() == crate::i18n::Language::Russian {
+                        "(польз.) "
+                    } else {
+                        "(user) "
+                    };
+                    hang += UnicodeWidthStr::width(user_str);
+                    spans.push(Span::styled(user_str.to_string(), theme.muted()));
                 }
                 (spans, hang)
             }
@@ -304,10 +311,15 @@ impl ExecuteToolCallBlock {
         } else {
             theme.primary().add_modifier(Modifier::BOLD)
         };
-        let mut spans = vec![Span::styled("Run ", label_style)];
+        let run_str = crate::i18n::tr(crate::i18n::TextKey::RunPrefix);
+        let mut spans = vec![Span::styled(run_str.into_owned(), label_style)];
         if self.bash_mode {
-            // Same style as session event messages (e.g. "Worked for 2.3s")
-            spans.push(Span::styled("(user) ", theme.muted()));
+            let user_str = if crate::i18n::language() == crate::i18n::Language::Russian {
+                "(польз.) "
+            } else {
+                "(user) "
+            };
+            spans.push(Span::styled(user_str.to_string(), theme.muted()));
         }
         // Single ratatui Line — never pass raw newlines (callers that need
         // multi-line command display use `push_command_soft_wrap`).
@@ -630,8 +642,16 @@ impl ExecuteToolCallBlock {
 /// Drop a leading `Run` / `Running` word (case-insensitive) plus following
 /// whitespace so Label headers do not read `Run Run the tests`.
 fn strip_leading_run_word(s: &str) -> String {
-    let lower = s.to_ascii_lowercase();
-    let rest = if let Some(rest) = lower.strip_prefix("running") {
+    let lower = s.to_lowercase();
+    let rest = if let Some(rest) = lower.strip_prefix("выполнение") {
+        rest
+    } else if let Some(rest) = lower.strip_prefix("выполнить") {
+        rest
+    } else if let Some(rest) = lower.strip_prefix("запустить") {
+        rest
+    } else if let Some(rest) = lower.strip_prefix("запуск") {
+        rest
+    } else if let Some(rest) = lower.strip_prefix("running") {
         rest
     } else if let Some(rest) = lower.strip_prefix("run") {
         rest
@@ -645,8 +665,6 @@ fn strip_leading_run_word(s: &str) -> String {
     if !rest.starts_with(|c: char| c.is_whitespace()) {
         return s.to_string();
     }
-    // Map back to original casing via byte length of the prefix consumed
-    // (`to_ascii_lowercase` preserves length for ASCII prefixes).
     let prefix_len = s.len() - rest.len();
     s[prefix_len..].trim_start().to_string()
 }
@@ -828,8 +846,9 @@ mod tests {
         assert_eq!(headers.len(), 2);
         let title = line_text(&headers[0].0);
         let cmd = line_text(&headers[1].0);
+        let run_pfx = crate::i18n::tr(crate::i18n::TextKey::RunPrefix);
         // Leading "Run " on the description is stripped (Label already has it).
-        assert_eq!(title, "Run the unit test suite");
+        assert_eq!(title, format!("{run_pfx}the unit test suite"));
         assert!(cmd.starts_with("$ "), "cmd={cmd:?}");
         assert!(cmd.contains("cargo test --lib"), "cmd={cmd:?}");
         // Prefix span counts: "Run " only on title; "$ " on command.
@@ -844,7 +863,8 @@ mod tests {
         let theme = Theme::current();
         let headers = block.header_lines(&theme, ExecuteHeaderStyle::Label, true, false);
         assert_eq!(headers.len(), 1);
-        assert_eq!(line_text(&headers[0].0), "Run the unit test suite");
+        let run_pfx = crate::i18n::tr(crate::i18n::TextKey::RunPrefix);
+        assert_eq!(line_text(&headers[0].0), format!("{run_pfx}the unit test suite"));
     }
 
     #[test]
@@ -876,7 +896,8 @@ mod tests {
         let headers = block.header_lines(&theme, ExecuteHeaderStyle::Label, false, false);
         assert_eq!(headers.len(), 1);
         let text = line_text(&headers[0].0);
-        assert!(text.starts_with("Run "), "header={text:?}");
+        let run_pfx = crate::i18n::tr(crate::i18n::TextKey::RunPrefix);
+        assert!(text.starts_with(run_pfx.as_ref()), "header={text:?}");
         assert!(text.contains("echo hi"), "header={text:?}");
     }
 
@@ -919,8 +940,9 @@ mod tests {
             lines.len()
         );
         let first = line_text(&lines[0].content);
+        let run_pfx = crate::i18n::tr(crate::i18n::TextKey::RunPrefix);
         assert!(
-            first.starts_with("Run "),
+            first.starts_with(run_pfx.as_ref()),
             "Label soft-wrap first row needs Run prefix: {first:?}"
         );
         assert!(
