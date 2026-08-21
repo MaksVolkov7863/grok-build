@@ -147,16 +147,18 @@ impl BlockContent for BgTaskBlock {
             Some(d) if !d.trim().is_empty() => d.replace('\n', " "),
             _ => command,
         };
+        use crate::i18n::{TextKey, tr};
+        let task_label = tr(TextKey::TasksGroupTasks);
         let line = match &self.kind {
             BgTaskKind::Started => Line::from(vec![
-                Span::styled("Task ", bold),
-                Span::styled("started: ", muted),
+                Span::styled(format!("{task_label} "), bold),
+                Span::styled(tr(TextKey::TaskStartedPrefix), muted),
                 Span::styled(display, muted),
             ]),
             BgTaskKind::Completed { elapsed } => Line::from(vec![
-                Span::styled("Task ", bold),
+                Span::styled(format!("{task_label} "), bold),
                 Span::styled(
-                    format!("completed in {}: ", format_duration(*elapsed)),
+                    format!("{}{}: ", tr(TextKey::TaskCompletedInPrefix), format_duration(*elapsed)),
                     muted,
                 ),
                 Span::styled(display, muted),
@@ -170,7 +172,11 @@ impl BlockContent for BgTaskBlock {
                 let is_killed = signal
                     .as_deref()
                     .is_some_and(|s| matches!(s, "killed" | "SIGTERM" | "SIGKILL" | "oom"));
-                let verb = if is_killed { "killed" } else { "failed" };
+                let prefix = if is_killed {
+                    tr(TextKey::TaskKilledInPrefix)
+                } else {
+                    tr(TextKey::TaskFailedInPrefix)
+                };
                 let detail = if is_killed {
                     String::new()
                 } else {
@@ -181,8 +187,8 @@ impl BlockContent for BgTaskBlock {
                     }
                 };
                 Line::from(vec![
-                    Span::styled("Task ", bold),
-                    Span::styled(format!("{verb} in {}: ", format_duration(*elapsed)), muted),
+                    Span::styled(format!("{task_label} "), bold),
+                    Span::styled(format!("{}{}: ", prefix, format_duration(*elapsed)), muted),
                     Span::styled(format!("{}{}", display, detail), muted),
                 ])
             }

@@ -3077,7 +3077,7 @@ fn render_dispatch(
         // (`paint_dispatch_feedback_badge`), not here, so it stays
         // visible even when the rejected text is still in the box.
         if !input_focused {
-            let msg = "Dispatch a new agent";
+            let msg = crate::i18n::tr_static(crate::i18n::TextKey::DashboardDispatchPlaceholder);
             let style = Style::default().fg(theme.gray_dim).bg(theme.bg_base);
             let trunc = truncate_str(msg, content.width.saturating_sub(prefix_w) as usize);
             buf.set_string(content.x + prefix_w, content.y, trunc, style);
@@ -3505,6 +3505,7 @@ fn render_footer(
         // Idle overflow toggle under the cursor — Enter reveals / re-folds
         // the older idle agents, so `open` / `stop` would lie. The nav chip
         // is omitted here too, mirroring the section-header row below.
+        use crate::i18n::{TextKey, tr};
         if state.selected_idle_overflow {
             let toggle = if state.idle_show_all {
                 "show fewer"
@@ -3513,10 +3514,10 @@ fn render_footer(
             };
             let hints = vec![
                 HintItem::new(key!(Enter), toggle),
-                HintItem::new(key!(Tab), "input"),
+                HintItem::new(key!(Tab), tr(TextKey::DashboardInputHint)),
             ];
             ShortcutsBar::new(&hints)
-                .compact(4, Some(HintItem::new(help, "shortcuts")))
+                .compact(4, Some(HintItem::new(help, tr(TextKey::HintShortcuts))))
                 .render(inner, buf);
             return;
         }
@@ -3525,29 +3526,34 @@ fn render_footer(
         // to the dispatch input (Esc does too, one tier at a time).
         if let Some(section) = state.selected_section {
             let toggle = if state.is_section_collapsed(section) {
-                "expand"
+                tr(TextKey::HintExpand)
             } else {
-                "collapse"
+                tr(TextKey::HintCollapse)
             };
             let hints = vec![
                 HintItem::new(key!(Enter), toggle),
-                HintItem::new(key!(Tab), "input"),
+                HintItem::new(key!(Tab), tr(TextKey::DashboardInputHint)),
             ];
             ShortcutsBar::new(&hints)
-                .compact(4, Some(HintItem::new(help, "shortcuts")))
+                .compact(4, Some(HintItem::new(help, tr(TextKey::HintShortcuts))))
                 .render(inner, buf);
             return;
         }
         let mut hints = vec![
-            HintItem::new(key!(Enter), "open"),
-            HintItem::new(key!(Tab), "input"),
+            HintItem::new(key!(Enter), tr(TextKey::HintOpen)),
+            HintItem::new(key!(Tab), tr(TextKey::DashboardInputHint)),
         ];
         if show_ctrl_x {
-            hints.push(HintItem::new(stop, stop_label).pinned());
+            let localized_stop = if stop_label == "stop" {
+                tr(TextKey::Stop)
+            } else {
+                tr(TextKey::HintDelete)
+            };
+            hints.push(HintItem::new(stop, localized_stop).pinned());
         }
 
         ShortcutsBar::new(&hints)
-            .compact(4, Some(HintItem::new(help, "shortcuts")))
+            .compact(4, Some(HintItem::new(help, tr(TextKey::HintShortcuts))))
             .render(inner, buf);
         return;
     }
@@ -3578,7 +3584,8 @@ fn render_footer(
         key!('.', CONTROL),
     );
 
-    let help_hint = HintItem::new(help, "shortcuts");
+    use crate::i18n::{TextKey, tr};
+    let help_hint = HintItem::new(help, tr(TextKey::HintShortcuts));
 
     // Submit chord is `send_key` (Enter, or Shift/Alt+Enter in multiline).
     // Ctrl+S is send+open. Empty draft: create/open on the submit chord;

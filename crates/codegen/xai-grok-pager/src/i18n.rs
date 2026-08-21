@@ -416,6 +416,20 @@ pub enum TextKey {
     WorkspaceConfirmLocal,
     WorkspaceLockedCli,
     QuestionDetailPlaceholder,
+
+    // Dashboard & Tasks & Recap
+    DashboardDispatchPlaceholder,
+    DashboardIdleSection,
+    DashboardIdleBadge,
+    DashboardNewAgentButton,
+    DashboardJustNow,
+    DashboardApply,
+    DashboardInputHint,
+    RecapHeader,
+    TaskStartedPrefix,
+    TaskCompletedInPrefix,
+    TaskFailedInPrefix,
+    TaskKilledInPrefix,
 }
 
 /// Translate a static UI string using the current application language.
@@ -1097,6 +1111,32 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::QuestionDetailPlaceholder) => {
             "Пожалуйста, укажите как можно больше подробностей."
         }
+
+        // Dashboard & Tasks & Recap
+        (Language::English, TextKey::DashboardDispatchPlaceholder) => "Dispatch a new agent",
+        (Language::Russian, TextKey::DashboardDispatchPlaceholder) => "Запустить нового агента",
+        (Language::English, TextKey::DashboardIdleSection) => "Idle",
+        (Language::Russian, TextKey::DashboardIdleSection) => "В ожидании",
+        (Language::English, TextKey::DashboardIdleBadge) => "idle",
+        (Language::Russian, TextKey::DashboardIdleBadge) => "в ожидании",
+        (Language::English, TextKey::DashboardNewAgentButton) => "[+ New Agent]",
+        (Language::Russian, TextKey::DashboardNewAgentButton) => "[+ Новый агент]",
+        (Language::English, TextKey::DashboardJustNow) => "just now",
+        (Language::Russian, TextKey::DashboardJustNow) => "только что",
+        (Language::English, TextKey::DashboardApply) => "apply",
+        (Language::Russian, TextKey::DashboardApply) => "применить",
+        (Language::English, TextKey::DashboardInputHint) => "input",
+        (Language::Russian, TextKey::DashboardInputHint) => "ввод",
+        (Language::English, TextKey::RecapHeader) => "Recap",
+        (Language::Russian, TextKey::RecapHeader) => "Итоги",
+        (Language::English, TextKey::TaskStartedPrefix) => "started: ",
+        (Language::Russian, TextKey::TaskStartedPrefix) => "запущена: ",
+        (Language::English, TextKey::TaskCompletedInPrefix) => "completed in ",
+        (Language::Russian, TextKey::TaskCompletedInPrefix) => "завершена за ",
+        (Language::English, TextKey::TaskFailedInPrefix) => "failed in ",
+        (Language::Russian, TextKey::TaskFailedInPrefix) => "ошибка за ",
+        (Language::English, TextKey::TaskKilledInPrefix) => "killed in ",
+        (Language::Russian, TextKey::TaskKilledInPrefix) => "принудительно остановлена за ",
     };
 
     Cow::Borrowed(text)
