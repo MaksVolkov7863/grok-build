@@ -1784,21 +1784,19 @@ pub struct PickerConfig<'a> {
 /// Standard picker shortcuts: navigate, select, close.
 ///
 /// Returns a static reference — no per-call allocation.
-pub fn picker_shortcuts() -> &'static [HintItem] {
-    static SHORTCUTS: LazyLock<Vec<HintItem>> = LazyLock::new(|| {
-        vec![
-            HintItem {
-                keys: vec![],
-                label: "nav".into(),
-                custom_display: Some("\u{2191}/\u{2193}"),
-                description: None,
-                pinned: false,
-            },
-            HintItem::new(crate::key!(Enter), "select"),
-            HintItem::new(crate::key!(Esc), "close"),
-        ]
-    });
-    &SHORTCUTS
+pub fn picker_shortcuts() -> Vec<HintItem> {
+    use crate::i18n::{TextKey, tr};
+    vec![
+        HintItem {
+            keys: vec![],
+            label: tr(TextKey::HintNav),
+            custom_display: Some("\u{2191}/\u{2193}"),
+            description: None,
+            pinned: false,
+        },
+        HintItem::new(crate::key!(Enter), tr(TextKey::HintSelect)),
+        HintItem::new(crate::key!(Esc), tr(TextKey::SettingsClose)),
+    ]
 }
 
 /// What happened after processing an input event.
@@ -2498,22 +2496,23 @@ pub fn render_picker(
         if let Some(shortcuts) = config.shortcuts {
             all_hints.extend_from_slice(shortcuts);
         }
+        use crate::i18n::{TextKey, tr};
         // Surface `i` in vim nav mode so users discover how to start typing.
         if config.vim_normal_first && !state.search_active {
-            all_hints.push(HintItem::new(crate::key!('i'), "search"));
+            all_hints.push(HintItem::new(crate::key!('i'), tr(TextKey::HintSearch)));
         }
         // Expandable: add e=expand and y=copy hints.
         if config.expandable && !config.compact_bottom_bar {
             all_hints.push(HintItem {
                 keys: vec![],
-                label: "expand".into(),
+                label: tr(TextKey::HintExpand),
                 custom_display: Some("e/Shift+e"),
                 description: None,
                 pinned: false,
             });
             all_hints.push(HintItem {
                 keys: vec![],
-                label: "copy".into(),
+                label: tr(TextKey::HintCopy),
                 custom_display: Some("y"),
                 description: None,
                 pinned: false,

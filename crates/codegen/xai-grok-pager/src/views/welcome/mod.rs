@@ -2494,15 +2494,16 @@ pub(crate) fn render_session_picker(
     // Build shortcuts for fullscreen mode. Chat mode drops the worktree /
     // deep-search / filter hints (local-Build-row actions).
     let worktree_shortcut: &'static str = "ctrl+w";
+    use crate::i18n::{TextKey, tr};
     use crate::views::shortcuts_bar::HintItem;
     let mut default_shortcuts: Vec<HintItem> = vec![
-        HintItem::new(crate::key!(Esc), "back"),
-        HintItem::new(crate::key!(Enter), "select"),
+        HintItem::new(crate::key!(Esc), tr(TextKey::HintBack)),
+        HintItem::new(crate::key!(Enter), tr(TextKey::HintSelect)),
     ];
     if !ctx.chat_mode {
         default_shortcuts.push(HintItem {
             keys: vec![],
-            label: "worktree".into(),
+            label: tr(TextKey::HintWorktree),
             custom_display: Some(worktree_shortcut),
             description: None,
             pinned: false,
@@ -2510,7 +2511,7 @@ pub(crate) fn render_session_picker(
     }
     default_shortcuts.push(HintItem {
         keys: vec![],
-        label: "navigate".into(),
+        label: tr(TextKey::HintNav),
         custom_display: Some("\u{2191}\u{2193}"),
         description: None,
         pinned: false,
@@ -2519,14 +2520,14 @@ pub(crate) fn render_session_picker(
         default_shortcuts.clear();
         default_shortcuts.push(HintItem {
             keys: vec![],
-            label: "confirm delete".into(),
+            label: tr(TextKey::HintConfirmDelete),
             custom_display: Some("y"),
             description: None,
             pinned: false,
         });
         default_shortcuts.push(HintItem {
             keys: vec![],
-            label: "cancel".into(),
+            label: tr(TextKey::Cancel),
             custom_display: Some("n"),
             description: None,
             pinned: false,
@@ -2534,14 +2535,14 @@ pub(crate) fn render_session_picker(
     } else if !ctx.chat_mode {
         default_shortcuts.push(HintItem {
             keys: vec![],
-            label: "filter".into(),
+            label: tr(TextKey::HintFilter),
             custom_display: Some("f"),
             description: None,
             pinned: false,
         });
         default_shortcuts.push(HintItem {
             keys: vec![],
-            label: "delete".into(),
+            label: tr(TextKey::HintDelete),
             custom_display: Some("d"),
             description: None,
             pinned: false,

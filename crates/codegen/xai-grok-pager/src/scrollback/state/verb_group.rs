@@ -385,18 +385,20 @@ impl<'e> BucketAccumulator<'e> {
             } else {
                 bucket.sources.len()
             };
-            let segment = format!(
-                "{}{} {} {}",
-                if i == 0 { "" } else { ", " },
+            let prefix = if i == 0 { "" } else { ", " };
+            let raw_segment = crate::i18n::format_verb_group_segment(
                 bucket.kind.verb(self.running),
                 count,
-                bucket.kind.noun(count)
+                bucket.kind.raw_noun(),
+                self.running,
             );
+            let segment = format!("{prefix}{raw_segment}");
             text.push_str(&segment);
             spans.push(Span::styled(segment, text_style));
         }
         if self.failed_count > 0 {
-            let suffix = format!(" · {} failed", self.failed_count);
+            use crate::i18n::{TextKey, tr};
+            let suffix = format!(" · {}{}", self.failed_count, tr(TextKey::FailedCountSuffix));
             text.push_str(&suffix);
             spans.push(Span::styled(suffix, theme.fg(theme.accent_error)));
         }

@@ -242,15 +242,16 @@ impl ThinkingBlock {
 
         let detail_style = theme.muted();
 
+        use crate::i18n::{TextKey, tr};
         if ctx.is_running {
-            Line::from(Span::styled("Thinking…", label_style))
+            Line::from(Span::styled(tr(TextKey::ThinkingRunning), label_style))
         } else if let Some(time_str) = self.format_time() {
             Line::from(vec![
-                Span::styled("Thought", label_style),
-                Span::styled(format!(" for {time_str}"), detail_style),
+                Span::styled(tr(TextKey::ThoughtDone), label_style),
+                Span::styled(format!("{}{time_str}", tr(TextKey::ThoughtFor)), detail_style),
             ])
         } else {
-            Line::from(Span::styled("Thought", label_style))
+            Line::from(Span::styled(tr(TextKey::ThoughtDone), label_style))
         }
     }
 

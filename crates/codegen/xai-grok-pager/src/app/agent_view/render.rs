@@ -2467,7 +2467,7 @@ impl AgentView {
         }
         if self.session.is_yolo() && !effective_plan {
             mode_flags_vec.push(PromptFlag {
-                text: "always-approve",
+                text: crate::i18n::tr_static(crate::i18n::TextKey::FlagAlwaysApprove),
                 color: None,
                 bold: false,
             });

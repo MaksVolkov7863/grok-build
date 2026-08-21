@@ -229,7 +229,17 @@ impl ActionDef {
     /// Uses `default_key` only. For paired hints (j/k, h/l), the view should
     /// use [`HintItem::paired`] with keys from two related action defs.
     pub fn hint(&self) -> HintItem {
-        let mut item = HintItem::new(self.default_key, self.label);
+        let localized_label = match self.label {
+            "shortcuts" => crate::i18n::tr(crate::i18n::TextKey::HintShortcuts),
+            "commands" => crate::i18n::tr(crate::i18n::TextKey::ModalTitleCommands),
+            "quit" => crate::i18n::tr(crate::i18n::TextKey::QuitLabel),
+            "nav" => crate::i18n::tr(crate::i18n::TextKey::HintNav),
+            "mode" => crate::i18n::tr(crate::i18n::TextKey::HintMode),
+            "tasks" => crate::i18n::tr(crate::i18n::TextKey::TasksGroupTasks),
+            "model" => crate::i18n::tr(crate::i18n::TextKey::SettingCategoryModels),
+            other => std::borrow::Cow::Borrowed(other),
+        };
+        let mut item = HintItem::new(self.default_key, localized_label);
         item.custom_display = self.hint_key_display;
         item.description = Some(std::borrow::Cow::Borrowed(self.description));
         item

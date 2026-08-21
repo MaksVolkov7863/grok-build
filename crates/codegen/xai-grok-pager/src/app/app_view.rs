@@ -4581,7 +4581,7 @@ impl AppView {
                             Vec::new();
                         if self.default_yolo {
                             flags_vec.push(crate::views::prompt_widget::PromptFlag {
-                                text: "always-approve",
+                                text: crate::i18n::tr_static(crate::i18n::TextKey::FlagAlwaysApprove),
                                 color: None,
                                 bold: false,
                             });

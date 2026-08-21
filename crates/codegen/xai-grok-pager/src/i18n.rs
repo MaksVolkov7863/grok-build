@@ -364,6 +364,33 @@ pub enum TextKey {
     QuestionOtherPlaceholder,
     QuestionSelectOption,
     QuestionSelectOptions,
+
+    // Additional UI Shortcuts & Actions
+    HintShortcuts,
+    HintWorktree,
+    HintFilter,
+    HintDelete,
+    HintConfirmDelete,
+    HintConfirm,
+    HintNextChoice,
+    HintSaveComment,
+    HintPrevNextAgent,
+    HintPrevNext,
+    HintSearch,
+
+    // Thinking & Tool Execution in Scrollback
+    ThinkingRunning,
+    ThoughtDone,
+    ThoughtFor,
+    RanPrefix,
+    RunningVerb,
+    FailedCountSuffix,
+
+    // Prompt Flags & Badges
+    FlagAlwaysApprove,
+    TipPrefix,
+    TipAttachFiles,
+    TipFreshWorktree,
 }
 
 /// Translate a static UI string using the current application language.
@@ -933,6 +960,60 @@ pub fn tr_for(language: Language, key: TextKey) -> Cow<'static, str> {
         (Language::Russian, TextKey::QuestionSelectOption) => "Выберите вариант",
         (Language::English, TextKey::QuestionSelectOptions) => "Select options",
         (Language::Russian, TextKey::QuestionSelectOptions) => "Выберите варианты",
+
+        // Additional UI Shortcuts & Actions
+        (Language::English, TextKey::HintShortcuts) => "shortcuts",
+        (Language::Russian, TextKey::HintShortcuts) => "горячие клавиши",
+        (Language::English, TextKey::HintWorktree) => "worktree",
+        (Language::Russian, TextKey::HintWorktree) => "worktree",
+        (Language::English, TextKey::HintFilter) => "filter",
+        (Language::Russian, TextKey::HintFilter) => "фильтр",
+        (Language::English, TextKey::HintDelete) => "delete",
+        (Language::Russian, TextKey::HintDelete) => "удалить",
+        (Language::English, TextKey::HintConfirmDelete) => "confirm delete",
+        (Language::Russian, TextKey::HintConfirmDelete) => "подтвердить удаление",
+        (Language::English, TextKey::HintConfirm) => "confirm",
+        (Language::Russian, TextKey::HintConfirm) => "подтвердить",
+        (Language::English, TextKey::HintNextChoice) => "next choice",
+        (Language::Russian, TextKey::HintNextChoice) => "след. вариант",
+        (Language::English, TextKey::HintSaveComment) => "save comment",
+        (Language::Russian, TextKey::HintSaveComment) => "сохранить комментарий",
+        (Language::English, TextKey::HintPrevNextAgent) => "prev/next agent",
+        (Language::Russian, TextKey::HintPrevNextAgent) => "пред/след агент",
+        (Language::English, TextKey::HintPrevNext) => "prev/next",
+        (Language::Russian, TextKey::HintPrevNext) => "пред/след",
+        (Language::English, TextKey::HintSearch) => "search",
+        (Language::Russian, TextKey::HintSearch) => "поиск",
+
+        // Thinking & Tool Execution in Scrollback
+        (Language::English, TextKey::ThinkingRunning) => "Thinking…",
+        (Language::Russian, TextKey::ThinkingRunning) => "Размышляет…",
+        (Language::English, TextKey::ThoughtDone) => "Thought",
+        (Language::Russian, TextKey::ThoughtDone) => "Размышлял",
+        (Language::English, TextKey::ThoughtFor) => " for ",
+        (Language::Russian, TextKey::ThoughtFor) => " — ",
+        (Language::English, TextKey::RanPrefix) => "Ran",
+        (Language::Russian, TextKey::RanPrefix) => "Запущено",
+        (Language::English, TextKey::RunningVerb) => "Running",
+        (Language::Russian, TextKey::RunningVerb) => "Выполняется",
+        (Language::English, TextKey::FailedCountSuffix) => " failed",
+        (Language::Russian, TextKey::FailedCountSuffix) => " с ошибкой",
+
+        // Prompt Flags & Badges
+        (Language::English, TextKey::FlagAlwaysApprove) => "always-approve",
+        (Language::Russian, TextKey::FlagAlwaysApprove) => "автоподтверждение",
+        (Language::English, TextKey::TipPrefix) => "Tip: ",
+        (Language::Russian, TextKey::TipPrefix) => "Совет: ",
+        (Language::English, TextKey::TipAttachFiles) => "Use @ to attach files like @src/main.rs.",
+        (Language::Russian, TextKey::TipAttachFiles) => {
+            "Используйте @ для прикрепления файлов, например @src/main.rs."
+        }
+        (Language::English, TextKey::TipFreshWorktree) => {
+            "Start Grok in a fresh worktree with `-w`; add `-r <session-id>` to resume an existing session there."
+        }
+        (Language::Russian, TextKey::TipFreshWorktree) => {
+            "Запустите Grok в новом worktree через `-w`; добавьте `-r <session-id>` для возобновления сессии."
+        }
     };
 
     Cow::Borrowed(text)
@@ -1021,6 +1102,36 @@ pub fn format_count_noun(count: usize, noun_en: &str) -> String {
                 other => other,
             };
             format!("{count} {noun_ru}")
+        }
+    }
+}
+
+pub fn format_verb_group_segment(verb_en: &str, count: usize, noun_en: &str, running: bool) -> String {
+    match language() {
+        Language::English => {
+            let plural = if count == 1 { "" } else { "s" };
+            format!("{verb_en} {count} {noun_en}{plural}")
+        }
+        Language::Russian => {
+            let verb_ru = match verb_en {
+                "Read" => "Прочитано",
+                "Reading" => "Чтение",
+                "Searched" => "Найдено",
+                "Searching" => "Поиск",
+                "Listed" => "Просмотрено",
+                "Listing" => "Просмотр",
+                "Fetched" => "Загружено",
+                "Fetching" => "Загрузка",
+                "Ran" => "Выполнено",
+                "Running" => "Выполнение",
+                "Edited" => "Изменено",
+                "Editing" => "Редактирование",
+                "Called" => "Вызвано",
+                "Calling" => "Вызов",
+                _ => if running { "Выполняется" } else { "Выполнено" },
+            };
+            let count_noun = format_count_noun(count, noun_en);
+            format!("{verb_ru} {count_noun}")
         }
     }
 }

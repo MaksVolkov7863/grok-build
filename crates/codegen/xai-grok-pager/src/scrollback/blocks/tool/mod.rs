@@ -149,6 +149,21 @@ impl VerbGroupKind {
         };
         if count == 1 { one } else { many }
     }
+
+    pub fn raw_noun(self) -> &'static str {
+        match self {
+            VerbGroupKind::File | VerbGroupKind::EditFile => "file",
+            VerbGroupKind::Skill => "skill",
+            VerbGroupKind::Search => "pattern",
+            VerbGroupKind::Dir => "dir",
+            VerbGroupKind::WebFetch | VerbGroupKind::WebSearch => "website",
+            VerbGroupKind::MemorySearch => "memory",
+            VerbGroupKind::IntegrationSearch | VerbGroupKind::McpCall => "MCP tool",
+            VerbGroupKind::Subagent => "subagent",
+            VerbGroupKind::Command => "command",
+            VerbGroupKind::OtherTool => "tool",
+        }
+    }
 }
 
 /// Tool call block - a sum type for different tool types.

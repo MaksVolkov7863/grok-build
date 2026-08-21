@@ -30,13 +30,22 @@ pub fn tip_height(width: u16, tip: &str) -> u16 {
 }
 
 fn tip_line(tip: &str) -> Line<'_> {
+    use crate::i18n::{TextKey, tr};
     let theme = Theme::current();
+    let prefix = tr(TextKey::TipPrefix);
+    let localized_tip = match tip.trim() {
+        "Use @ to attach files like @src/main.rs." => tr(TextKey::TipAttachFiles),
+        "Start Grok in a fresh worktree with `-w`; add `-r <session-id>` to resume an existing session there." => {
+            tr(TextKey::TipFreshWorktree)
+        }
+        _ => std::borrow::Cow::Borrowed(tip),
+    };
     Line::from(vec![
         Span::styled(
-            "Tip: ",
+            prefix,
             Style::default().fg(theme.gray).add_modifier(Modifier::BOLD),
         ),
-        Span::styled(tip, Style::default().fg(theme.gray)),
+        Span::styled(localized_tip, Style::default().fg(theme.gray)),
     ])
 }
 
