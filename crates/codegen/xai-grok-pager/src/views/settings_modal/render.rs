@@ -336,22 +336,22 @@ fn build_reset_confirm_shortcuts() -> Vec<Shortcut<'static>> {
     use crate::views::modal::{RESET_CONFIRM_NO_ID, RESET_CONFIRM_YES_ID};
     vec![
         Shortcut {
-            label: "y reset",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintYReset),
             clickable: true,
             id: RESET_CONFIRM_YES_ID,
         },
         Shortcut {
-            label: "n cancel",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintNCancel),
             clickable: true,
             id: RESET_CONFIRM_NO_ID,
         },
         Shortcut {
-            label: "Esc cancel",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscCancel),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "F2 cancel",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintF2Cancel),
             clickable: false,
             id: 0,
         },
@@ -2749,14 +2749,14 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                     id: 0,
                 },
                 Shortcut {
-                    label: "g/G top/btm",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintTopBtmSettings),
                     clickable: false,
                     id: 0,
                 },
             ];
             if !locked {
                 shortcuts.push(Shortcut {
-                    label: "Space toggle",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintSpaceToggle),
                     clickable: false,
                     id: 0,
                 });
@@ -2773,20 +2773,20 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                     id: 0,
                 },
                 Shortcut {
-                    label: "/ search",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintSlashSearch),
                     clickable: false,
                     id: 0,
                 },
             ]);
             if !locked {
                 shortcuts.push(Shortcut {
-                    label: "d reset",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintDReset),
                     clickable: false,
                     id: 0,
                 });
             }
             shortcuts.push(Shortcut {
-                label: "F2/Esc close",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintF2EscClose),
                 clickable: false,
                 id: 0,
             });
@@ -2797,7 +2797,7 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
         }
         SettingsMode::FilterFocused => vec![
             Shortcut {
-                label: "type to filter",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintTypeToFilter),
                 clickable: false,
                 id: 0,
             },
@@ -2807,17 +2807,17 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                 id: 0,
             },
             Shortcut {
-                label: "Backspace edit",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintBackspaceEdit),
                 clickable: false,
                 id: 0,
             },
             Shortcut {
-                label: "Enter commit",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterCommit),
                 clickable: false,
                 id: 0,
             },
             Shortcut {
-                label: "Esc clear",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClear),
                 clickable: false,
                 id: 0,
             },
@@ -2845,7 +2845,7 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                 // "selects". The filter bar and the value editors, where
                 // Enter really does commit typed input, keep that wording.
                 Shortcut {
-                    label: "Enter select",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterSelect),
                     clickable: false,
                     id: 0,
                 },
@@ -2859,7 +2859,7 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
             // this stays a description of what actually works on the pane.
             if !consent {
                 shortcuts.push(Shortcut {
-                    label: "d reset",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintDReset),
                     clickable: false,
                     id: 0,
                 });
@@ -2881,17 +2881,17 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                     id: 0,
                 },
                 Shortcut {
-                    label: "Enter commit",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterCommit),
                     clickable: false,
                     id: 0,
                 },
                 Shortcut {
-                    label: "Esc cancel",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscCancel),
                     clickable: false,
                     id: 0,
                 },
                 Shortcut {
-                    label: "d reset",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintDReset),
                     clickable: false,
                     id: 0,
                 },
@@ -2899,7 +2899,7 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
         }
         SettingsMode::EditingString { .. } => vec![
             Shortcut {
-                label: "type to edit",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintTypeToEdit),
                 clickable: false,
                 id: 0,
             },
@@ -2909,12 +2909,12 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                 id: 0,
             },
             Shortcut {
-                label: "Enter commit",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterCommit),
                 clickable: false,
                 id: 0,
             },
             Shortcut {
-                label: "Esc cancel",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscCancel),
                 clickable: false,
                 id: 0,
             },
@@ -2926,12 +2926,12 @@ pub(super) fn build_shortcuts(state: &SettingsModalState) -> Vec<Shortcut<'stati
                 id: 0,
             },
             Shortcut {
-                label: "Space/Enter toggle",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintSpaceEnterToggle),
                 clickable: false,
                 id: 0,
             },
             Shortcut {
-                label: "Esc back",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscBack),
                 clickable: false,
                 id: 0,
             },

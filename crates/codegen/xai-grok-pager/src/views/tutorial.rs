@@ -336,7 +336,7 @@ pub fn render_tutorial(buf: &mut Buffer, area: Rect, st: &mut TutorialState, com
             };
             let mut shortcuts = vec![
                 Shortcut {
-                    label: "\u{2191}/\u{2193} scroll",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintUpDnScroll),
                     clickable: false,
                     id: 0,
                 },
@@ -348,13 +348,13 @@ pub fn render_tutorial(buf: &mut Buffer, area: Rect, st: &mut TutorialState, com
             ];
             if topic.go_deeper.is_some() {
                 shortcuts.push(Shortcut {
-                    label: "d go deeper",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintGoDeeper),
                     clickable: false,
                     id: 0,
                 });
             }
             shortcuts.push(Shortcut {
-                label: "Esc list",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscList),
                 clickable: false,
                 id: 0,
             });
@@ -409,18 +409,18 @@ fn render_list(buf: &mut Buffer, area: Rect, st: &mut TutorialState, compact: bo
             id: 0,
         },
         Shortcut {
-            label: "Enter open",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterOpen),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "Esc done",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscDone),
             clickable: false,
             id: 0,
         },
     ];
     let modal_config = ModalWindowConfig {
-        title: "Welcome to Grok Build",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleWelcome),
         tabs: None,
         shortcuts: &shortcuts,
         sizing: ModalSizing {

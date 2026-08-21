@@ -715,7 +715,7 @@ fn build_shortcuts(state: &PersonaDetailState) -> Vec<Shortcut<'static>> {
             });
         }
         shortcuts.push(Shortcut {
-            label: "Esc back",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscBack),
             clickable: false,
             id: 0,
         });

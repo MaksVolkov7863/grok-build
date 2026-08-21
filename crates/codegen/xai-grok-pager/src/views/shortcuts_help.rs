@@ -662,17 +662,17 @@ pub fn modal_footer_detail() -> Vec<crate::views::modal_window::Shortcut<'static
     use crate::views::modal_window::Shortcut;
     vec![
         Shortcut {
-            label: "Esc back",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscBack),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "\u{2191}/\u{2193} scroll",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintUpDnScroll),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "Ctrl+./X close",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintCtrlClose),
             clickable: false,
             id: 0,
         },
@@ -767,7 +767,7 @@ pub fn render_detail(
     };
     let footer = modal_footer_detail();
     let modal_config = mw::ModalWindowConfig {
-        title: "Keyboard Shortcuts",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleKeyboardShortcuts),
         tabs: None,
         shortcuts: &footer,
         sizing: modal_sizing(compact),
@@ -1103,17 +1103,17 @@ pub fn modal_footer(filter_active: bool) -> Vec<crate::views::modal_window::Shor
             id: 0,
         },
         Shortcut {
-            label: "Enter details",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterDetails),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "/ search",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintSlashSearch),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "Esc close",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
             clickable: false,
             id: 0,
         },
@@ -1351,7 +1351,7 @@ pub fn render_modal(
     let non_sel: Vec<bool> = vec![false; picker_entries.len()];
     let footer = modal_footer(filter_active);
     let modal_config = mw::ModalWindowConfig {
-        title: "Keyboard Shortcuts",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleKeyboardShortcuts),
         tabs: None,
         shortcuts: &footer,
         sizing: modal_sizing(compact),
@@ -1471,7 +1471,7 @@ pub fn handle_modal_key(
         modal_footer(filter_active)
     };
     let chrome_cfg = mw::ModalWindowConfig {
-        title: "Keyboard Shortcuts",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleKeyboardShortcuts),
         tabs: None,
         shortcuts: &footer,
         sizing: modal_sizing(compact),

@@ -1097,7 +1097,7 @@ pub fn render_doc_picker_overlay(
             id: 0,
         },
         Shortcut {
-            label: "Esc close",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
             clickable: false,
             id: 0,
         },
@@ -1118,7 +1118,7 @@ pub fn render_doc_picker_overlay(
         ..base_sizing
     };
     let modal_config = ModalWindowConfig {
-        title: "How-to Guides",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleHowToGuides),
         tabs: None,
         shortcuts: &picker_shortcuts,
         sizing,
@@ -1195,12 +1195,12 @@ pub fn render_doc_viewer_overlay(
 ) {
     let doc_shortcuts = [
         super::modal_window::Shortcut {
-            label: "\u{2191}/\u{2193} scroll",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintUpDnScroll),
             clickable: false,
             id: 0,
         },
         super::modal_window::Shortcut {
-            label: "Esc back",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscBack),
             clickable: false,
             id: 0,
         },

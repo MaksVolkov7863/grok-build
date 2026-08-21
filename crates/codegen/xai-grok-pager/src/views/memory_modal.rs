@@ -380,7 +380,7 @@ pub fn render_memory_modal(
     let shortcuts = build_shortcuts(&state.mode, state.memory_enabled, state.fullscreen);
 
     let modal_config = ModalWindowConfig {
-        title: "Memory",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleMemory),
         tabs: None,
         shortcuts: &shortcuts,
         sizing: if state.fullscreen {
@@ -1044,7 +1044,7 @@ fn build_shortcuts(
                     id: 0,
                 },
                 Shortcut {
-                    label: "/ search",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintSlashSearch),
                     clickable: false,
                     id: 0,
                 },
@@ -1073,7 +1073,7 @@ fn build_shortcuts(
                     id: 0,
                 },
                 Shortcut {
-                    label: "Esc close",
+                    label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
                     clickable: false,
                     id: 0,
                 },

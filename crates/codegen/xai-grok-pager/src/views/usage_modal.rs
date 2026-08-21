@@ -47,9 +47,9 @@ impl UsageInfoTab {
 
     pub fn label(self) -> &'static str {
         match self {
-            UsageInfoTab::ContextUsage => "Context usage",
-            UsageInfoTab::UsageLimit => "Usage limit",
-            UsageInfoTab::SessionInfo => "Session info",
+            UsageInfoTab::ContextUsage => crate::i18n::tr_static(crate::i18n::TextKey::TabContextUsage),
+            UsageInfoTab::UsageLimit => crate::i18n::tr_static(crate::i18n::TextKey::TabUsageLimit),
+            UsageInfoTab::SessionInfo => crate::i18n::tr_static(crate::i18n::TextKey::TabSessionInfo),
         }
     }
 
@@ -493,19 +493,19 @@ pub fn render_usage_modal(
 
     let mut shortcuts: Vec<Shortcut> = vec![
         Shortcut {
-            label: "Tab switch",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintTabSwitch),
             clickable: false,
             id: 0,
         },
         Shortcut {
-            label: "\u{2191}/\u{2193} scroll",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintUpDnScroll),
             clickable: false,
             id: 0,
         },
     ];
     if state.ctx.session_id.is_some() {
         shortcuts.push(Shortcut {
-            label: "c copy session ID",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintCopySessionId),
             clickable: true,
             id: COPY_SESSION_ID_SHORTCUT,
         });
@@ -514,13 +514,13 @@ pub fn render_usage_modal(
         && state.session_fields.as_ref().is_some_and(|f| !f.is_empty())
     {
         shortcuts.push(Shortcut {
-            label: "y copy all",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintCopyAll),
             clickable: true,
             id: COPY_ALL_SESSION_INFO_SHORTCUT,
         });
     }
     shortcuts.push(Shortcut {
-        label: "Esc close",
+        label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
         clickable: false,
         id: 0,
     });
@@ -925,7 +925,7 @@ fn session_info_content(state: &UsageInfoModalState, theme: &Theme) -> TabConten
     };
 
     let mut lines = vec![Line::from(vec![
-        Span::styled("Session info", header_style(theme)),
+        Span::styled(crate::i18n::tr_static(crate::i18n::TextKey::TabSessionInfo), header_style(theme)),
         Span::styled(
             "   click or drag to copy",
             Style::default().fg(theme.gray_dim),
@@ -1121,9 +1121,9 @@ mod tests {
             })
             .collect();
         for needle in [
-            "Context usage",
-            "Usage limit",
-            "Session info",
+            crate::i18n::tr_static(crate::i18n::TextKey::TabContextUsage),
+            crate::i18n::tr_static(crate::i18n::TextKey::TabUsageLimit),
+            crate::i18n::tr_static(crate::i18n::TextKey::TabSessionInfo),
             "copy session ID",
             "Session usage: no model calls yet.",
         ] {

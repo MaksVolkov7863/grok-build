@@ -3483,7 +3483,7 @@ pub fn render_extensions_modal(
         // from the footer to save space — the cheatsheet still lists it.
         // ID 99 = close action, handled in the mouse handler.
         shortcuts.push(Shortcut {
-            label: "Esc close",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
             clickable: true,
             id: 99,
         });

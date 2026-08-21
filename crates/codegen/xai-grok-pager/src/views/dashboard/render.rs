@@ -1047,7 +1047,7 @@ fn render_location_picker(
             id: 2,
         },
         Shortcut {
-            label: "Esc close",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
             clickable: false,
             id: 3,
         },
@@ -1056,7 +1056,7 @@ fn render_location_picker(
     // picker, but Esc drops to nav under vim).
     push_vim_nav_search_hint(&mut shortcuts, modal.picker.search_active);
     let config = ModalWindowConfig {
-        title: "Change directory",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleChangeDirectory),
         tabs: None,
         shortcuts: &shortcuts,
         sizing: ModalSizing::medium(),

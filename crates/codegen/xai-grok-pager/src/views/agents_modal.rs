@@ -1023,7 +1023,7 @@ pub fn render_agents_modal(
         AgentsTab::Personas => build_personas_tab_shortcuts(state),
     };
     let config = ModalWindowConfig {
-        title: "Agents",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleAgents),
         tabs: Some(&tab_labels),
         shortcuts: &shortcuts,
         sizing: modal_sizing(compact),
@@ -1069,7 +1069,7 @@ fn build_agents_tab_shortcuts<'a>(state: &AgentsModalState) -> Vec<Shortcut<'a>>
             id: 0,
         },
         Shortcut {
-            label: "/ search",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintSlashSearch),
             clickable: false,
             id: 0,
         },
@@ -1089,7 +1089,7 @@ fn build_agents_tab_shortcuts<'a>(state: &AgentsModalState) -> Vec<Shortcut<'a>>
             id: 0,
         },
         Shortcut {
-            label: "Esc close",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
             clickable: false,
             id: 0,
         },
@@ -1153,7 +1153,7 @@ fn build_personas_tab_shortcuts<'a>(state: &AgentsModalState) -> Vec<Shortcut<'a
                 id: 0,
             },
             Shortcut {
-                label: "/ search",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintSlashSearch),
                 clickable: false,
                 id: 0,
             },
@@ -1173,7 +1173,7 @@ fn build_personas_tab_shortcuts<'a>(state: &AgentsModalState) -> Vec<Shortcut<'a
                 id: 0,
             },
             Shortcut {
-                label: "Esc close",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
                 clickable: false,
                 id: 0,
             },
@@ -2004,7 +2004,7 @@ pub fn handle_agents_key(state: &mut AgentsModalState, key: &KeyEvent) -> Agents
     }
     let tab_labels: Vec<&str> = AgentsTab::ALL.iter().map(|t| t.label()).collect();
     let config = ModalWindowConfig {
-        title: "Agents",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleAgents),
         tabs: Some(&tab_labels),
         shortcuts: &[],
         sizing: modal_sizing(false),

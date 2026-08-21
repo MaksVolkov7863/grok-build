@@ -175,66 +175,66 @@ pub fn footer_shortcuts(
     let mut s = Vec::new();
     if in_detail {
         s.push(Shortcut {
-            label: "↑↓ phase · enter agent",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintPhaseEnterAgent),
             clickable: false,
             id: 0,
         });
         if has_run_list {
             s.push(Shortcut {
-                label: "←/tab runs",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintTabRuns),
                 clickable: true,
                 id: shortcut_ids::RUNS,
             });
         }
         if run.is_some_and(WorkflowRunSnapshot::can_pause) {
             s.push(Shortcut {
-                label: "p pause",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintPause),
                 clickable: true,
                 id: shortcut_ids::PAUSE,
             });
         }
         if run.is_some_and(WorkflowRunSnapshot::can_resume) {
             s.push(Shortcut {
-                label: "r resume",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintResume),
                 clickable: true,
                 id: shortcut_ids::RESUME,
             });
         }
         if run.is_some_and(WorkflowRunSnapshot::can_stop) {
             s.push(Shortcut {
-                label: "x stop",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintStop),
                 clickable: true,
                 id: shortcut_ids::STOP,
             });
         }
         if run.is_some_and(WorkflowRunSnapshot::can_save) {
             s.push(Shortcut {
-                label: "s save",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintSave),
                 clickable: true,
                 id: shortcut_ids::SAVE,
             });
         }
     } else {
         s.push(Shortcut {
-            label: "↑↓ select",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintUpDnSelect),
             clickable: false,
             id: 0,
         });
         s.push(Shortcut {
-            label: "enter open",
+            label: crate::i18n::tr_static(crate::i18n::TextKey::HintEnterOpen),
             clickable: true,
             id: shortcut_ids::OPEN,
         });
         if run.is_some_and(WorkflowRunSnapshot::can_stop) {
             s.push(Shortcut {
-                label: "x stop",
+                label: crate::i18n::tr_static(crate::i18n::TextKey::HintStop),
                 clickable: true,
                 id: shortcut_ids::STOP,
             });
         }
     }
     s.push(Shortcut {
-        label: "esc close",
+        label: crate::i18n::tr_static(crate::i18n::TextKey::HintEscClose),
         clickable: false,
         id: 0,
     });
@@ -549,7 +549,7 @@ pub fn render_workflows(
     let selected_run = detail_run.or_else(|| runs.get(state.selected_run).copied());
     let (shortcuts, sizing) = modal_config(in_detail, has_run_list, selected_run);
     let config = ModalWindowConfig {
-        title: "Workflows",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ModalTitleWorkflows),
         tabs: None,
         shortcuts: &shortcuts,
         sizing,

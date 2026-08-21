@@ -633,7 +633,7 @@ pub fn render_import_claude_modal(
         },
     ];
     let config = ModalWindowConfig {
-        title: "Import Claude settings",
+        title: crate::i18n::tr_static(crate::i18n::TextKey::ImportClaudeSettings),
         tabs: None,
         shortcuts: &shortcuts,
         sizing: ModalSizing::default().with_compact(compact),
