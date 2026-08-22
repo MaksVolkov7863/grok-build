@@ -118,6 +118,6 @@ jobs:
           TAG="v1.0.6-ru-full"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           gh release create "$TAG" release-assets/* \
-            --title "Grok Build 1.0.6 — Полная русская локализация и фикс раскладки" \
-            --notes "Включает полную русскую локализацию интерфейса, статусов выполнения, инструментов и фикс горячих клавиш вставки (Ctrl+V / Ctrl+Shift+V) на русской раскладке в Windows.\n\nBuild commit: $GITHUB_SHA" \
+            --title "Grok Build 1.0.6 — Полная русская локализация и поддержка русской раскладки" \
+            --notes "Включает полную русскую локализацию интерфейса, статусов выполнения, инструментов и полную поддержку горячих клавиш (Ctrl+C, Ctrl+V, Ctrl+O, Ctrl+Z, Alt+X, модальные окна y/n/x и др.) при любой раскладке клавиатуры в Windows.\n\nBuild commit: $GITHUB_SHA" \
             --target "$GITHUB_SHA"

@@ -35,7 +35,14 @@ pub struct ModalOption<R> {
 impl<R> ModalConfirmation<R> {
     /// Check if a character matches any option. Returns the result if matched.
     pub fn resolve(&self, ch: char) -> Option<&R> {
-        self.options.iter().find(|o| o.key == ch).map(|o| &o.result)
+        let latin_opt = crate::input::key::cyrillic_to_latin(ch);
+        self.options
+            .iter()
+            .find(|o| {
+                o.key.eq_ignore_ascii_case(&ch)
+                    || latin_opt.map_or(false, |latin| o.key.eq_ignore_ascii_case(&latin))
+            })
+            .map(|o| &o.result)
     }
 }
 /// Result of the edit-confirmation modal.

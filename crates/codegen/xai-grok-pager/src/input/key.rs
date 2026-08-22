@@ -42,7 +42,19 @@ impl KeyShortcut {
             return false;
         }
         let normalized = Self::new(event.code, event.modifiers);
-        self.code == normalized.code && self.modifiers == normalized.modifiers
+        if self.code == normalized.code && self.modifiers == normalized.modifiers {
+            return true;
+        }
+        // Support standard Russian keyboard layout: map Cyrillic character to Latin equivalent.
+        if let KeyCode::Char(c) = event.code
+            && let Some(mapped) = cyrillic_to_latin(c)
+        {
+            let mapped_normalized = Self::new(KeyCode::Char(mapped), event.modifiers);
+            if self.code == mapped_normalized.code && self.modifiers == mapped_normalized.modifiers {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn to_key_event(self) -> KeyEvent {
@@ -152,22 +164,29 @@ impl KeyShortcut {
     }
 }
 
-/// Match a shortcut by the physical key position on the standard Russian
-/// Windows layout, without altering ordinary unmodified Russian input.
-fn matches_russian_layout_shortcut(key: &KeyEvent, latin: char, russian: char, modifiers: KeyModifiers) -> bool {
-    if key.kind == KeyEventKind::Release || key.modifiers != modifiers {
-        return false;
+/// Map a Cyrillic character from the standard Russian JCUKEN / QWERTY layout
+/// to its corresponding Latin key character on the physical keyboard.
+pub fn cyrillic_to_latin(c: char) -> Option<char> {
+    let lower = c.to_lowercase().next()?;
+    let mapped = match lower {
+        'й' => 'q', 'ц' => 'w', 'у' => 'e', 'к' => 'r', 'е' => 't', 'н' => 'y',
+        'г' => 'u', 'ш' => 'i', 'щ' => 'o', 'з' => 'p', 'х' => '[', 'ъ' => ']',
+        'ф' => 'a', 'ы' => 's', 'в' => 'd', 'а' => 'f', 'п' => 'g', 'р' => 'h',
+        'о' => 'j', 'л' => 'k', 'д' => 'l', 'ж' => ';', 'э' => '\'',
+        'я' => 'z', 'ч' => 'x', 'с' => 'c', 'м' => 'v', 'и' => 'b', 'т' => 'n',
+        'ь' => 'm', 'б' => ',', 'ю' => '.', 'ё' => '`',
+        _ => return None,
+    };
+    if c.is_uppercase() {
+        Some(mapped.to_ascii_uppercase())
+    } else {
+        Some(mapped)
     }
-    matches!(key.code, KeyCode::Char(c) if c.eq_ignore_ascii_case(&latin) || c.eq_ignore_ascii_case(&russian))
 }
 
 pub fn is_paste_key(key: &KeyEvent) -> bool {
-    // Standard Russian layout: physical V is the Cyrillic `м` key.
-    // Windows terminals may therefore report Ctrl+V as Ctrl+М.
-    if matches_russian_layout_shortcut(key, 'v', 'м', KeyModifiers::CONTROL) {
-        return true;
-    }
-    key!('v', SUPER).matches(key)
+    key!('v', CONTROL).matches(key)
+        || key!('v', SUPER).matches(key)
         || {
             #[cfg(target_os = "windows")]
             {
@@ -183,12 +202,6 @@ pub fn is_paste_key(key: &KeyEvent) -> bool {
 pub fn is_inline_paste_key(key: &KeyEvent) -> bool {
     key!('v', CONTROL | SHIFT).matches(key)
         || key!('v', SUPER | SHIFT).matches(key)
-        || matches_russian_layout_shortcut(
-            key,
-            'v',
-            'м',
-            KeyModifiers::CONTROL | KeyModifiers::SHIFT,
-        )
 }
 
 /// Ctrl+Z / Cmd+Z — the textarea's undo binding.
@@ -317,5 +330,27 @@ mod tests {
             KeyCode::Char('м'),
             KeyModifiers::CONTROL | KeyModifiers::ALT,
         )));
+    }
+
+    #[test]
+    fn russian_shortcuts_match_all_ctrl_chords() {
+        // Ctrl+C (С)
+        assert!(key!('c', CONTROL).matches(&KeyEvent::new(KeyCode::Char('с'), KeyModifiers::CONTROL)));
+        assert!(key!('c', CONTROL).matches(&KeyEvent::new(KeyCode::Char('С'), KeyModifiers::CONTROL)));
+
+        // Ctrl+O (Щ)
+        assert!(key!('o', CONTROL).matches(&KeyEvent::new(KeyCode::Char('щ'), KeyModifiers::CONTROL)));
+
+        // Ctrl+G (П)
+        assert!(key!('g', CONTROL).matches(&KeyEvent::new(KeyCode::Char('п'), KeyModifiers::CONTROL)));
+
+        // Ctrl+Z (Я)
+        assert!(key!('z', CONTROL).matches(&KeyEvent::new(KeyCode::Char('я'), KeyModifiers::CONTROL)));
+
+        // Alt+X (Ч)
+        assert!(key!('x', ALT).matches(&KeyEvent::new(KeyCode::Char('ч'), KeyModifiers::ALT)));
+
+        // Ctrl+Shift+N (Т)
+        assert!(key!('n', CONTROL | SHIFT).matches(&KeyEvent::new(KeyCode::Char('т'), KeyModifiers::CONTROL | KeyModifiers::SHIFT)));
     }
 }
